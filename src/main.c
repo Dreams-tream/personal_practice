@@ -3,26 +3,26 @@
 #include <signal.h>
 #include "loop.h"
 
-int dbg_level = DBG_ERR;
+extern int dbg_level;
 
 void exit_process(int sig)
 {
 	if(SIGINT == sig || SIGTERM == sig)
 	{
-		ERR("exit the program!\n");
+		LOG_ERR("exit the program!\n");
 		exit(0);
 	}
 }
 
 void adjust_debug_level(int sig)
 {
-	
-	if(SIGUSR1 == sig )
-		dbg_level < DBG_LOG ? dbg_level++ : 0;
-	if(SIGUSR2 == sig )
-		dbg_level >= DBG_WARN ? dbg_level-- :0;
 
-	ERR("dbg_level=%d\n",dbg_level);
+	if(SIGUSR1 == sig )
+		dbg_level < LOG_LEVEL_DEBUG ? dbg_level++ : 0;
+	if(SIGUSR2 == sig )
+		dbg_level > LOG_LEVEL_ERROR ? dbg_level-- :0;
+
+	LOG_ERR("dbg_level=%d\n",dbg_level);
 }
 
 void _signal_receive()
@@ -35,7 +35,7 @@ void _signal_receive()
 
 int main()
 {
-	ERR("this is the start of function");
+	LOG_ERR("this is the start of function");
 	_signal_receive();
 	timer_loop();
 	return 0;

@@ -1,4 +1,8 @@
+#include <stdio.h>
+#include <stdarg.h>
 #include "log.h"
+
+int dbg_level = LOG_LEVEL_ERROR;
 
 /*print in varieties of formats*/
 void va_printf(const char* fmt, ...)
@@ -17,10 +21,10 @@ void _exec_get_res(const char *cmd,char *res)
 
 	if ( NULL == (fp=popen(cmd,"r")) )
 	{
-		ERR("popen failed!");
+		LOG_ERR("popen failed!");
 		return;
 	}
-	
+
 	char *str = res;
 	while( NULL != fgets(str,MAX_CMD_LEN,fp) )//fgets add '\0' at the end
 	{

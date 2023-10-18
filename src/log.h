@@ -1,23 +1,14 @@
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-
-/*define 4 print levels, you can send SIGUSR1 or SIGUSR2 to adjust current level*/
-enum{
-	DBG_ERR,
-	DBG_WARN,
-	DBG_INFO,
-	DBG_LOG
-};
+#ifndef _LOG_H
+#define _LOG_H
 
 enum{
-	NOK = -1,
-	OK  = 0
+	LOG_LEVEL_ERROR,
+	LOG_LEVEL_WARN,
+	LOG_LEVEL_INFO,
+	LOG_LEVEL_DEBUG
 };
 
-#define MAX_CMD_LEN 1024
-
-extern int dbg_level;
+#define MAX_CMD_LEN 256
 
 void va_printf(const char* fmt, ...);
 void _exec_get_res(const char* cmd,char *res);
@@ -27,28 +18,30 @@ void _exec_get_res(const char* cmd,char *res);
 	_exec_get_res(cmd,buf);\
 }while(0)
 
-#define ERR(fmt, ...) do{\
-	if ( dbg_level >= DBG_ERR )\
+#define LOG_ERR(fmt, ...) do{\
+	if ( dbg_level >= LOG_LEVEL_ERROR )\
 	{\
-		va_printf("ERR[%s,%d]" fmt "\n",__func__,__LINE__,##__VA_ARGS__);\
+		va_printf("LOG_ERR[%s,%d]" fmt "\n",__func__,__LINE__,##__VA_ARGS__);\
 	}\
 }while(0)
 
-#define WARN(fmt,arg...) do{\
-	if ( dbg_level >= DBG_WARN )\
-		va_printf("WARN[%s,%d]"fmt"\n",__func__,__LINE__,##arg);\
+#define LOG_WARN(fmt,arg...) do{\
+	if ( dbg_level >= LOG_LEVEL_WARN )\
+		va_printf("LOG_WARN[%s,%d]"fmt"\n",__func__,__LINE__,##arg);\
 }while(0)
 
-#define INFO(fmt,arg...) do{\
-	if ( dbg_level >= DBG_INFO )\
-	va_printf("WARN[%s,%d]"fmt"\n",__func__,__LINE__,##arg);\
+#define LOG_INFO(fmt,arg...) do{\
+	if ( dbg_level >= LOG_LEVEL_INFO )\
+	va_printf("LOG_INFO[%s,%d]"fmt"\n",__func__,__LINE__,##arg);\
 }while(0)
 
-#define LOG(fmt,arg...) do{\
-	if ( dbg_level >= DBG_LOG )\
-		va_printf("[%s,%d]"fmt"\n",__func__,__LINE__,##arg);\
+#define LOG_DEBUG(fmt,arg...) do{\
+	if ( dbg_level >= LOG_LEVEL_DEBUG )\
+		va_printf("LOG_DEBUG[%s,%d]"fmt"\n",__func__,__LINE__,##arg);\
 }while(0)
 
 #define CMD(cmd) do{\
 	printf("CMD[%s,%d]%s\n",__func__,__LINE__,cmd);\
 }while(0)
+
+#endif
