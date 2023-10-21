@@ -2,17 +2,19 @@
 #include<signal.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include<json_object.h>
 
 #include"module.h"
 #include"log.h"
 
-#define MODULE_PID_FILE             "/tmp/YCL.pid"
+#define DEFAULT_TIME                       1000/*s*/
 
 module_cfg g_module_cfg;
+extern int dbg_level;
 
 
 void_func(monitor_signal);
-void_func(signal_process, int sig);
+void signal_process(int sig);
 int_func(create_pid_file);
 
 void_func(monitor_signal)
@@ -23,13 +25,14 @@ void_func(monitor_signal)
 	signal(SIGUSR2, signal_process);
 }
 
-void_func(signal_process, int sig)
+void signal_process(int sig)
 {
 	switch(sig)
 	{
 	case SIGTERM:
 	case SIGINT:
 		LOG_ERR("Exit this module");
+		module_exec_cmd("rm -f %s%s%s",MODULE_CODE_DIR,DEFAULT_AUTHOR_NAME,CONFIG_FILE_POSTFIX);
 		exit(0);
 	case SIGUSR1:
 		dbg_level<LOG_LEVEL_DEBUG?dbg_level++:0;
@@ -45,35 +48,82 @@ void_func(signal_process, int sig)
 	}
 }
 
+int create_config_json_file(char *author,unsigned int seconds)
+{
+	int ret = OK;
+	char conf_file[MODULE_FILE_LEN] = {0};
+	json_object *j_obj,*j_str,*j_int;
+
+	j_obj=j_str=j_int=NULL;
+	if(strlen(author)>AUTHOR_NAME_LEN)
+	{
+		LOG_ERR("Invalid author length!");
+		return ERROR;
+	}
+
+	snprintf(conf_file,MODULE_FILE_LEN-1,"%s%s%s",MODULE_CODE_DIR,author,CONFIG_FILE_POSTFIX);
+	j_obj = json_object_new_object();
+	j_str = json_object_new_string(author);
+	j_int = json_object_new_int(seconds>0?seconds:DEFAULT_TIME);
+	if(NULL==j_obj || NULL==j_str || NULL==j_int)
+	{
+		ret = ERROR;
+		goto END;
+	}
+	json_object_object_add(j_obj,"author",j_str);
+	json_object_object_add(j_obj,"seconds",j_int);
+	LOG_ERR("%s:%s",conf_file,json_object_to_json_string(j_obj));
+END:
+	if(j_obj)
+		json_object_put(j_obj);
+	if(j_str)
+		json_object_put(j_str);
+	if(j_int)
+		json_object_put(j_int);
+	return ret;
+}
+
 int_func(create_pid_file)
 {
-	FILE *fp = fopen(MODULE_PID_FILE, "w+");
+	FILE *fp = NULL;
 	pid_t pid = getpid();
+	char pid_file[MODULE_FILE_LEN] = {0};
 
+	snprintf(pid_file,MODULE_FILE_LEN-1,"%s%s.pid",MODULE_CODE_DIR,g_module_cfg.conf.author);
+	fp = fopen(MODULE_CODE_DIR, "w+");
 	if(!fp)
 	{
-
 		return ERROR;
 	}
 
 	fprintf(fp,"%u",pid);
-	fclose(fp);s
+	fclose(fp);
 	return OK;
 }
 
 int_func(create_pid_file);
 
-int main()
+int main(int argc, char **argv)
 {
+	char author[AUTHOR_NAME_LEN+1] = {0};
+	unsigned int seconds = DEFAULT_TIME;
+
 	monitor_signal();
+	if(ERROR==create_config_json_file(author,seconds))
+	{
+		LOG_ERR("Create config file error!");
+		return ERROR;
+	}
+
+	memset(&g_module_cfg,0,sizeof(g_module_cfg));
+	module_load_config();
 
 	if(ERROR==create_pid_file())
 	{
 		LOG_ERR("Create pid file error!");
 		return ERROR;
 	}
-	memset(&g_module_cfg,0,sizeof(g_module_cfg));
-	module_load_config();
+
 	module_register_callbacks(&g_module_cfg.cb);
 	module_init_platform();
 	module_timer_loop();

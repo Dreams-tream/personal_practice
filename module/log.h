@@ -6,12 +6,20 @@ enum{
 	LOG_LEVEL_ERROR,
 	LOG_LEVEL_WARN,
 	LOG_LEVEL_INFO,
-	LOG_LEVEL_DEBUG
+	LOG_LEVEL_DEBUG,
+	LOG_LEVEL_MAX
 };
+
 
 #define MAX_CMD_LEN 256
 
 void va_printf(const char* fmt, ...);
+void va_exec_cmd(const char* fmt, ...);
+
+#define module_exec_cmd(fmt,...) do{\
+	va_printf("CMD[%s,%d]"fmt,__FUNCTION__,__LINE__,##__VA_ARGS__);\
+	va_exec_cmd(fmt,##__VA_ARGS__);\
+}while(0)
 
 #define LOG_ERR(fmt, ...) do{\
 	if ( dbg_level >= LOG_LEVEL_ERROR )\

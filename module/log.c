@@ -2,19 +2,11 @@
 #include<string.h>
 #include "log.h"
 
-
+#define NAME_TO_STR(_name)         (#_name)
 
 int dbg_level = LOG_LEVEL_ERROR;
 
-enum{
-	LOG_LEVEL_ERROR,
-	LOG_LEVEL_WARN,
-	LOG_LEVEL_INFO,
-	LOG_LEVEL_DEBUG,
-	LOG_LEVEL_MAX
-};
-#define NAME_TO_STR(_name)         #_name
-char* LogLevelToStr(int dbg_level)
+char* LogLevelToStr(int level)
 {
 	char res[20] = {0};
 	char* log_level_str[LOG_LEVEL_MAX] = {
@@ -24,15 +16,23 @@ char* LogLevelToStr(int dbg_level)
 		[LOG_LEVEL_DEBUG] = "LOG_LEVEL_DEBUG"
 	};
 
-	if(dbg_level<LOG_LEVEL_ERROR || dbg_level>LOG_LEVEL_DEBUG)
+	if(level<LOG_LEVEL_ERROR || level>LOG_LEVEL_DEBUG)
 	{
 		return NULL;
 	}
 
-	snprintf(res,sizeof(res)-1,"%s",NAME_TO_STR(log_level_str[dbg_level]));
+	snprintf(res,sizeof(res)-1,"%s",NAME_TO_STR(log_level_str[level]));
 	return res;
 }
 
+void va_exec_cmd(const char* fmt, ...)
+{
+	va_list list;
+	char buffer[MAX_CMD_LEN+1] = {0};
+	va_start(list,fmt);
+	vsprintf(buffer,fmt,list);
+	system(buffer);
+}
 
 /*print in varieties of formats*/
 void va_printf(const char* fmt, ...)

@@ -6,7 +6,7 @@
 
 
 
-void_func(module_register_callbacks, module_callback *cb)
+void module_register_callbacks(module_callback *cb)
 {
 	cb->event_loop = module_event_loop;
 	cb->timer_loop = module_timer_loop;
