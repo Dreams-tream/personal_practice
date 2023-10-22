@@ -51,10 +51,17 @@ void signal_process(int sig)
 int create_config_json_file(char *author,unsigned int seconds)
 {
 	int ret = OK;
+	char empty_author[AUTHOR_NAME_LEN+1] = {0};
 	char conf_file[MODULE_FILE_LEN] = {0};
 	json_object *j_obj,*j_str,*j_int;
 
 	j_obj=j_str=j_int=NULL;
+	LOG_ERR("");
+	if(!memcmp(author,empty_author,AUTHOR_NAME_LEN))
+	{
+		LOG_ERR("Author is empty! Use default!");
+		memmove(author,DEFAULT_AUTHOR_NAME,strlen(DEFAULT_AUTHOR_NAME));
+	}
 	if(strlen(author)>AUTHOR_NAME_LEN)
 	{
 		LOG_ERR("Invalid author length!");
@@ -72,14 +79,23 @@ int create_config_json_file(char *author,unsigned int seconds)
 	}
 	json_object_object_add(j_obj,"author",j_str);
 	json_object_object_add(j_obj,"seconds",j_int);
+	json_object_to_file(conf_file,j_obj);
 	LOG_ERR("%s:%s",conf_file,json_object_to_json_string(j_obj));
 END:
-	if(j_obj)
-		json_object_put(j_obj);
-	if(j_str)
-		json_object_put(j_str);
-	if(j_int)
-		json_object_put(j_int);
+	if(j_int){
+		int ret=json_object_put(j_int);
+		j_int = NULL;
+	LOG_ERR("ret=%d",ret);
+	}
+	if(j_str){
+		int ret=json_object_put(j_str);
+		j_str = NULL;
+	LOG_ERR("ret=%d",ret);
+	}
+	if(j_obj){
+		//int ret=json_object_put(j_obj);
+		j_obj = NULL;
+	LOG_ERR("ret=%d",ret);}
 	return ret;
 }
 
