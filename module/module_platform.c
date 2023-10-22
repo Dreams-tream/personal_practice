@@ -2,22 +2,28 @@
 #include"module.h"
 #include"log.h"
 #include<stdio.h>
+#include<json.h>
 
 extern module_cfg g_module_cfg;
 extern int dbg_level;
 
-int get_config_from_json(const char *conf_file, module_config *conf)
+void_func(PRINT_MODULE_CONFIG)
 {
-	return OK;
+	LOG_DEBUG("author:%s",g_module_cfg.conf.author);
+	LOG_DEBUG("seconds:%u",g_module_cfg.conf.seconds);
 }
+
 int module_load_config()
 {
 	FILE* fp = NULL;
+	int seconds = 0;
 	char conf_file[MODULE_FILE_LEN+1] = {0};
-	char empty_author[AUTHOR_NAME_LEN+1] = {0};
 	char author[AUTHOR_NAME_LEN+1] = {0};
+	char *p_author = NULL;
+	json_object *j_obj,*j_tmp;
 
-	if(memcmp(g_module_cfg.conf.author,author,AUTHOR_NAME_LEN))
+
+	if(strlen(g_module_cfg.conf.author)>0)
 	{
 		memmove(author,g_module_cfg.conf.author,AUTHOR_NAME_LEN);
 		LOG_ERR("No config file! Use default");
@@ -26,16 +32,23 @@ int module_load_config()
 		snprintf(author,AUTHOR_NAME_LEN,"%s",DEFAULT_AUTHOR_NAME);
 
 	snprintf(conf_file,MODULE_FILE_LEN,"%s%s%s",MODULE_CODE_DIR,author,CONFIG_FILE_POSTFIX);
-	fp = fopen(conf_file,"w+");
-	if(!fp)
+
+	j_obj = j_tmp = NULL;
+	j_obj = json_object_from_file(conf_file);
+	if(NULL==j_obj)
 	{
-		LOG_ERR("open %s fail!",conf_file);
+		LOG_ERR("Read json from config file fail");
 		return ERROR;
 	}
 
-	if(ERROR==get_config_from_json(conf_file,&g_module_cfg.conf))
-		return ERROR;
+	j_tmp = json_object_object_get(j_obj,"author");
+	p_author = json_object_get_string(j_tmp);
+	j_tmp = json_object_object_get(j_obj,"seconds");
+	seconds = json_object_get_int(j_tmp);
 
+	memmove(&g_module_cfg.conf.author,p_author,strlen(p_author));
+	g_module_cfg.conf.seconds = seconds;
+	PRINT_MODULE_CONFIG();
 	return OK;
 }
 

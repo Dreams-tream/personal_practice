@@ -14,7 +14,7 @@
 
 typedef struct module_config{
 	char author[AUTHOR_NAME_LEN+1];
-	unsigned int times;
+	int seconds;
 }module_config;
 
 enum{

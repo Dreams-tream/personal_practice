@@ -70,32 +70,20 @@ int create_config_json_file(char *author,unsigned int seconds)
 
 	snprintf(conf_file,MODULE_FILE_LEN-1,"%s%s%s",MODULE_CODE_DIR,author,CONFIG_FILE_POSTFIX);
 	j_obj = json_object_new_object();
-	j_str = json_object_new_string(author);
-	j_int = json_object_new_int(seconds>0?seconds:DEFAULT_TIME);
-	if(NULL==j_obj || NULL==j_str || NULL==j_int)
+	if(NULL==j_obj)
 	{
 		ret = ERROR;
 		goto END;
 	}
-	json_object_object_add(j_obj,"author",j_str);
-	json_object_object_add(j_obj,"seconds",j_int);
-	json_object_to_file(conf_file,j_obj);
+	json_object_object_add(j_obj,"author",json_object_new_string(author));
+	json_object_object_add(j_obj,"seconds",json_object_new_int(seconds>0?seconds:DEFAULT_TIME));
 	LOG_ERR("%s:%s",conf_file,json_object_to_json_string(j_obj));
 END:
-	if(j_int){
-		int ret=json_object_put(j_int);
-		j_int = NULL;
-	LOG_ERR("ret=%d",ret);
-	}
-	if(j_str){
-		int ret=json_object_put(j_str);
-		j_str = NULL;
-	LOG_ERR("ret=%d",ret);
-	}
 	if(j_obj){
-		//int ret=json_object_put(j_obj);
+		json_object_to_file(conf_file,j_obj);
+		json_object_put(j_obj);
 		j_obj = NULL;
-	LOG_ERR("ret=%d",ret);}
+	}
 	return ret;
 }
 
