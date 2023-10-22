@@ -22,11 +22,10 @@ enum{
 	OK = 0,
 };
 
-int_func(module_load_config);
-void_func(module_init_platform);
-void_func(module_timer_loop);
-void_func(module_event_loop);
 
+void_func(platform_init_platform);
+void_func(platform_timer_loop);
+void_func(platform_event_loop);
 
 
 #endif
