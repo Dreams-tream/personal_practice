@@ -2,7 +2,7 @@
 #include<stdio.h>
 #include<signal.h>
 #include <sys/types.h>
-#include <unistd.h>
+#include <unistd.h>                  /*Definition of getopt()*/
 #include<json_object.h>
 #include"log.h"
 
@@ -11,12 +11,53 @@
 static module_cfg g_module_cfg;
 extern int dbg_level;
 
+int module_parse_parameter(int argc,char **argv,const char *optstring);
+void_func(USAGE);
 void_func(monitor_signal);
 void signal_process(int sig);
 int_func(create_pid_file);
 void_func(PRINT_MODULE_CONFIG);
 int_func(module_load_config);
 
+
+int module_parse_parameter(int argc,char **argv,const char *optstring)
+{
+	int opt;
+	int ret = OK;
+	int mask = 0;
+
+	while((opt = getopt(argc,argv,optstring)) != ERROR)
+	{
+		switch(opt)
+		{
+		case 'a':
+			PRINT("author is %s",optarg);
+			memmove(g_module_cfg.conf.author,optarg,AUTHOR_NAME_LEN);
+			mask |= 0x01;
+			break;
+		case 's':
+			PRINT("seconds are %s",optarg);
+			g_module_cfg.conf.seconds=atoi(optarg);
+			mask |= 0x10;
+		case 'h':
+			USAGE();
+			break;
+		default:
+			PRINT("unkonwn command!");
+			ret = ERROR;
+			break;
+		}
+	}
+
+	if(mask & 0x11)
+		PRINT_MODULE_CONFIG();
+	return ret;
+}
+
+void_func(USAGE)
+{
+
+}
 
 void_func(monitor_signal)
 {
@@ -158,6 +199,12 @@ int main(int argc, char **argv)
 {
 	char author[AUTHOR_NAME_LEN+1] = {0};
 	unsigned int seconds = DEFAULT_TIME;
+
+	if(ERROR==module_parse_parameter(argc,argv,"a:s:h"))
+	{
+		LOG_ERR("parse parameter failed!");
+		return ERROR;
+	}
 
 	monitor_signal();
 	if(ERROR==create_config_json_file(author,seconds))

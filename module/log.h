@@ -21,6 +21,8 @@ void va_exec_cmd(const char* fmt, ...);
 	va_exec_cmd(fmt,##__VA_ARGS__);\
 }while(0)
 
+#define PRINT(fmt,args...) va_printf("[%s,%d]"fmt"\n",__func__,__LINE__,##args)
+
 #define LOG_ERR(fmt, ...) do{\
 	if ( dbg_level >= LOG_LEVEL_ERROR )\
 	{\
