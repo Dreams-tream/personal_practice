@@ -17,7 +17,7 @@ void va_printf(const char* fmt, ...);
 void va_exec_cmd(const char* fmt, ...);
 
 #define module_exec_cmd(fmt,...) do{\
-	va_printf("CMD[%s,%d]"fmt,__FUNCTION__,__LINE__,##__VA_ARGS__);\
+	va_printf("CMD[%s,%d]"fmt"\n",__FUNCTION__,__LINE__,##__VA_ARGS__);\
 	va_exec_cmd(fmt,##__VA_ARGS__);\
 }while(0)
 

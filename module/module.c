@@ -33,7 +33,7 @@ void signal_process(int sig)
 	case SIGTERM:
 	case SIGINT:
 		LOG_ERR("Exit this module");
-		module_exec_cmd("rm -f %s%s%s",MODULE_CODE_DIR,DEFAULT_AUTHOR_NAME,CONFIG_FILE_POSTFIX);
+		module_exec_cmd("rm -f %s%s.*",MODULE_CODE_DIR,DEFAULT_AUTHOR_NAME);
 		exit(0);
 	case SIGUSR1:
 		dbg_level<LOG_LEVEL_DEBUG?dbg_level++:0;
@@ -57,7 +57,6 @@ int create_config_json_file(char *author,unsigned int seconds)
 	json_object *j_obj,*j_str,*j_int;
 
 	j_obj=j_str=j_int=NULL;
-	LOG_ERR("");
 	if(!memcmp(author,empty_author,AUTHOR_NAME_LEN))
 	{
 		LOG_ERR("Author is empty! Use default!");
@@ -143,7 +142,7 @@ int_func(create_pid_file)
 	strlen(g_module_cfg.conf.author)<=0?memmove(author,DEFAULT_AUTHOR_NAME,strlen(DEFAULT_AUTHOR_NAME)):\
 		memmove(author,g_module_cfg.conf.author,AUTHOR_NAME_LEN);
 	snprintf(pid_file,MODULE_FILE_LEN,"%s%s.pid",MODULE_CODE_DIR,author);
-	LOG_WARN("pid_file=%s",pid_file);
+	LOG_WARN("pid_file=%s, pid=%d",pid_file, pid);
 	fp = fopen(pid_file, "w+");
 	if(!fp)
 	{
