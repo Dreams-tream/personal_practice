@@ -103,21 +103,23 @@ int_func(create_pid_file)
 {
 	FILE *fp = NULL;
 	pid_t pid = getpid();
-	char pid_file[MODULE_FILE_LEN] = {0};
+	char pid_file[MODULE_FILE_LEN+1] = {0};
+	char author[AUTHOR_NAME_LEN+1] = {0};
 
-	snprintf(pid_file,MODULE_FILE_LEN-1,"%s%s.pid",MODULE_CODE_DIR,g_module_cfg.conf.author);
-	fp = fopen(MODULE_CODE_DIR, "w+");
+	strlen(g_module_cfg.conf.author)<=0?memmove(author,DEFAULT_AUTHOR_NAME,strlen(DEFAULT_AUTHOR_NAME)):\
+		memmove(author,g_module_cfg.conf.author,AUTHOR_NAME_LEN);
+	snprintf(pid_file,MODULE_FILE_LEN,"%s%s.pid",MODULE_CODE_DIR,author);
+	LOG_WARN("pid_file=%s",pid_file);
+	fp = fopen(pid_file, "w+");
 	if(!fp)
 	{
 		return ERROR;
 	}
 
-	fprintf(fp,"%u",pid);
+	fprintf(fp,"%u\n",pid);
 	fclose(fp);
 	return OK;
 }
-
-int_func(create_pid_file);
 
 int main(int argc, char **argv)
 {

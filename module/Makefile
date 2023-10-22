@@ -23,7 +23,7 @@ $(TARGET) : $(SRC_CODE)
 	$(CC) $(CFLAGS) $(COMPILE_SRC)  -o $@ $(LDFLAGS)
 
 clean :
-	rm -f $(PWD)/$(TARGET)*
+	rm -f $(PWD)/$(TARGET)* $(PWD)/.pid $(PWD)/*.pid
 
 
 

@@ -4,7 +4,7 @@
 
 #define NAME_TO_STR(_name)         (#_name)
 
-int dbg_level = LOG_LEVEL_ERROR;
+int dbg_level = LOG_LEVEL_MAX;
 
 char* LogLevelToStr(int level)
 {
