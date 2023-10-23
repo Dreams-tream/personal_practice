@@ -8,7 +8,6 @@ int dbg_level = LOG_LEVEL_MAX;
 
 char* LogLevelToStr(int level)
 {
-	char res[20] = {0};
 	char* log_level_str[LOG_LEVEL_MAX] = {
 		[LOG_LEVEL_ERROR] = "LOG_LEVEL_ERROR",
 		[LOG_LEVEL_WARN]  = "LOG_LEVEL_WARN",
@@ -16,13 +15,13 @@ char* LogLevelToStr(int level)
 		[LOG_LEVEL_DEBUG] = "LOG_LEVEL_DEBUG"
 	};
 
-	if(level<LOG_LEVEL_ERROR || level>LOG_LEVEL_DEBUG)
-	{
-		return NULL;
-	}
+	if(level<LOG_LEVEL_ERROR)
+		return log_level_str[LOG_LEVEL_ERROR];
 
-	snprintf(res,sizeof(res)-1,"%s",NAME_TO_STR(log_level_str[level]));
-	return res;
+	if(level>LOG_LEVEL_DEBUG)
+		return log_level_str[LOG_LEVEL_DEBUG];
+
+	return log_level_str[level];
 }
 
 void va_exec_cmd(const char* fmt, ...)
