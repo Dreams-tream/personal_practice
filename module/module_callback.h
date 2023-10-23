@@ -9,6 +9,7 @@ typedef struct module_callback{
 	init_platform_callback    init_platform;
 	timer_loop_callback       timer_loop;
 	event_loop_callback       event_loop;
+	/*void (*event_loop)();*/
 }module_callback;
 
 void module_init_platform(module_callback *cb);
