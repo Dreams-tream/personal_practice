@@ -1,6 +1,11 @@
-#include <stdarg.h>
-#include<string.h>
 #include "log.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #define NAME_TO_STR(_name)         (#_name)
 
@@ -29,17 +34,28 @@ void va_exec_cmd(const char* fmt, ...)
 	va_list list;
 	char buffer[MAX_CMD_LEN+1] = {0};
 	va_start(list,fmt);
-	vsprintf(buffer,fmt,list);
+	vsnprintf(buffer,MAX_CMD_LEN,fmt,list);
+	va_end(list);
 	system(buffer);
 }
 
 /*print in varieties of formats*/
 void va_printf(const char* fmt, ...)
 {
+	int fd;
+	char buffer[MAX_CMD_LEN+1] = {0};
 	va_list args;
 	va_start(args,fmt);
-	vprintf(fmt,args);
+	vsnprintf(buffer,MAX_CMD_LEN,fmt,args);
 	va_end(args);
+	//ps -el list this program's tty is pts/20
+	if((fd=open("/dev/pts/20",O_RDWR))<=0)
+	{
+		perror("open console failed!");
+		return;
+	}
+	write(fd,buffer, strlen(buffer));
+	close(fd);
 }
 
 /*execute cmd and get all output in res if the length of result is less than MAX_CMD_LEN*/
