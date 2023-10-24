@@ -199,16 +199,23 @@ int_func(create_pid_file)
 int_func(get_current_virtul_console)
 {
 	int len=0;
+	FILE *fp;
 	char res[MAX_CMD_LEN+1]={0};
 
 	memset(g_virtule_console,0,MAX_DEVICE_LEN);
-	if((-1) != module_exec_get_res("w|grep -w w| awk '{print $2}'",res))
+	if(fp= popen("w|grep -w w| awk '{print $2}'","r"))
 	{
+		fgets(res,MAX_CMD_LEN,fp);
+		pclose(fp);
+
 		len=strlen(res);
-		if(len)
+		while(len>0 && ('\n'==res[len-1] || '\t'==res[len-1] || ' '==res[len-1]))
+			res[(len--)-1] = '\0';
+
+		if(strlen(res))
 		{
-			memmove(g_virtule_console,res,len);
-			LOG_ERR("current virtual console is %s%s","/dev/",g_virtule_console);
+			memmove(g_virtule_console,res,strlen(res));
+			printf("[%s,%d]current virtual console is '%s%s'\n",__func__,__LINE__,"/dev/",g_virtule_console);
 			return OK;
 		}
 	}

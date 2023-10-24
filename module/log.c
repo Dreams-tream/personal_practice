@@ -9,7 +9,7 @@
 
 #define NAME_TO_STR(_name)         (#_name)
 
-int dbg_level = LOG_LEVEL_MAX;
+int dbg_level = LOG_LEVEL_ERROR;
 char g_virtule_console[MAX_DEVICE_LEN+1];
 
 char* LogLevelToStr(int level)
@@ -53,7 +53,7 @@ void va_printf(const char* fmt, ...)
 	snprintf(virtule_console,MAX_DEVICE_LEN,"%s%s","/dev/",g_virtule_console);
 	if((fd=open(virtule_console,O_RDWR))<=0)
 	{
-		printf("open '%s' console failed!",virtule_console);
+		perror("open console failed!");
 		return;
 	}
 	write(fd,buffer, strlen(buffer));
@@ -69,7 +69,7 @@ int module_exec_get_res(const char *cmd,char *res)
 	//printf("%s\n",cmd);
 	if ( NULL == (fp=popen(cmd,"r")) )
 	{
-		printf("popen failed!\n");
+		LOG_ERR("popen failed!");
 		return (-1);
 	}
 
