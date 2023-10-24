@@ -64,17 +64,20 @@ void platform_timer_loop()
 	FD_SET(timer_fd,&readset);
 	for(total_time=0;;)
 	{
+		timeout.tv_sec = 0;
+		timeout.tv_usec = LOOP_TIMEOUT_MICROSECOND;
+
 		//int select(int nfds,fd_set* readset,fd_set* writeset,fe_set* exceptset,struct timeval* timeout);
 		select_res = select(max_fd+1,&readset,NULL,NULL,&timeout);
 		if(select_res>0)
 		{
 			if(FD_ISSET(timer_fd,&readset))//file descriptor in set
 			{
-				LOG_INFO("selected fd is readable");
+				LOG_DEBUG("selected fd is readable");
 				if(size_64bits == read(timer_fd,&expire_time,sizeof(uint64_t)))
 				{
 					total_time += expire_time;
-					LOG_INFO("total_time=%llu, expire_time=%llu",
+					LOG_DEBUG("total_time=%llu, expire_time=%llu",
 						(unsigned long long)total_time,(unsigned long long)expire_time);
 					continue;
 				}
@@ -85,10 +88,6 @@ void platform_timer_loop()
 		else if(0==select_res)
 		{
 			LOG_INFO("reach timeout value %ds %dus",timeout.tv_sec,timeout.tv_usec);
-			FD_ZERO(&readset);
-			FD_SET(timer_fd,&readset);
-			timeout.tv_sec = 0;
-			timeout.tv_usec = LOOP_TIMEOUT_MICROSECOND;
 		}
 		else
 		{
