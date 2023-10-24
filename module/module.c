@@ -208,6 +208,7 @@ int_func(get_current_virtul_console)
 		if(len)
 		{
 			memmove(g_virtule_console,res,len);
+			LOG_ERR("current virtual console is %s%s","/dev/",g_virtule_console);
 			return OK;
 		}
 	}

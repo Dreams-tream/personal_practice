@@ -66,7 +66,7 @@ int module_exec_get_res(const char *cmd,char *res)
 	FILE *fp = NULL;
 	char *p = NULL;
 
-	printf("%s\n",cmd);
+	//printf("%s\n",cmd);
 	if ( NULL == (fp=popen(cmd,"r")) )
 	{
 		printf("popen failed!\n");
@@ -81,7 +81,7 @@ int module_exec_get_res(const char *cmd,char *res)
 	p = &str[strlen(str)-1];
 	if ( *p == '\n' || *p == '\r' )
 		*p = '\0';
-	fclose(fp);
-	printf("%s\n",res);
+	pclose(fp);
+	//printf("%s\n",res);
 	return 0;
 }
