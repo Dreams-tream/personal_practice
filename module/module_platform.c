@@ -56,7 +56,7 @@ void platform_timer_loop()
 	//set timeout to control time
 	if(-1 == timerfd_settime(timer_fd,TFD_TIMER_ABSTIME, &new_time, NULL))
 	{
-		LOG_ERR("set new time failed");
+		LOG_ERR("timerfd_settime failed");
 		goto EXIT;
 	}
 
@@ -64,12 +64,11 @@ void platform_timer_loop()
 	FD_SET(timer_fd,&readset);
 	for(total_time=0;;)
 	{
-
 		//int select(int nfds,fd_set* readset,fd_set* writeset,fe_set* exceptset,struct timeval* timeout);
 		select_res = select(max_fd+1,&readset,NULL,NULL,&timeout);
-		if(FD_ISSET(timer_fd,&readset))//file descriptor in set
+		if(select_res>0)
 		{
-			if(select_res>0)
+			if(FD_ISSET(timer_fd,&readset))//file descriptor in set
 			{
 				LOG_INFO("selected fd is readable");
 				if(size_64bits == read(timer_fd,&expire_time,sizeof(uint64_t)))
@@ -81,18 +80,19 @@ void platform_timer_loop()
 				}
 				LOG_ERR("Read timer_fd failed");
 			}
-			else if(0==select_res)
-			{
-				LOG_INFO("reach timeout value %dms",timeout.tv_usec/1000);
-			}
-			else
-			{
-				LOG_ERR("selected fd is not readable");
-			}
+			LOG_ERR("FD_ISSET = 0, ERROR!");
+		}
+		else if(0==select_res)
+		{
+			LOG_INFO("reach timeout value %ds %dus",timeout.tv_sec,timeout.tv_usec);
+			FD_ZERO(&readset);
+			FD_SET(timer_fd,&readset);
+			timeout.tv_sec = 0;
+			timeout.tv_usec = LOOP_TIMEOUT_MICROSECOND;
 		}
 		else
 		{
-			LOG_ERR("FD_ISSET = 0, ERROR!");
+			LOG_ERR("selected fd is not readable");
 			goto EXIT;
 		}
 	}
