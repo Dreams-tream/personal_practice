@@ -92,7 +92,9 @@ void platform_timer_loop()
 		else
 		{
 			LOG_ERR("selected fd is not readable");
-			goto EXIT;
+			/*On error, -1 is returned,  and  errno  is set appropriately; the sets and timeout become undefined*/
+			FD_ZERO(&readset);
+			FD_SET(timer_fd,&readset);
 		}
 	}
 	exit(OK);
