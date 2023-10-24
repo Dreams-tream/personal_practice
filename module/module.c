@@ -10,6 +10,7 @@
 
 static module_cfg g_module_cfg;
 extern int dbg_level;
+extern char g_virtule_console[MAX_DEVICE_LEN];
 
 int module_parse_parameter(int argc,char **argv,const char *optstring);
 void_func(USAGE);
@@ -18,7 +19,7 @@ void signal_process(int sig);
 int_func(create_pid_file);
 void_func(PRINT_MODULE_CONFIG);
 int_func(module_load_config);
-
+int_func(get_current_virtul_console);
 
 int module_parse_parameter(int argc,char **argv,const char *optstring)
 {
@@ -195,10 +196,34 @@ int_func(create_pid_file)
 	return OK;
 }
 
+int_func(get_current_virtul_console)
+{
+	int len=0;
+	char res[MAX_CMD_LEN+1]={0};
+
+	memset(g_virtule_console,0,MAX_DEVICE_LEN);
+	if((-1) != module_exec_get_res("w|grep -w w| awk '{print $2}'",res))
+	{
+		len=strlen(res);
+		if(len)
+		{
+			memmove(g_virtule_console,res,len);
+			return OK;
+		}
+	}
+	return ERROR;
+}
+
 int main(int argc, char **argv)
 {
 	char author[AUTHOR_NAME_LEN+1] = {0};
 	unsigned int seconds = DEFAULT_TIME;
+
+	if(ERROR==get_current_virtul_console())
+	{
+		perror("cannot get current console!");
+		return ERROR;
+	}
 
 	if(ERROR==module_parse_parameter(argc,argv,"a:s:h"))
 	{

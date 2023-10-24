@@ -10,13 +10,15 @@ enum{
 };
 
 
-#define MAX_CMD_LEN 256
+#define MAX_CMD_LEN            256
+#define MAX_DEVICE_LEN         50
 
 void va_printf(const char* fmt, ...);
 void va_exec_cmd(const char* fmt, ...);
+int module_exec_get_res(const char *cmd,char *res);
 
 #define module_exec_cmd(fmt,...) do{\
-	va_printf("[%s,%d]"fmt"\n",__FUNCTION__,__LINE__,##__VA_ARGS__);\
+	printf("[%s,%d]"fmt"\n",__FUNCTION__,__LINE__,##__VA_ARGS__);\
 	va_exec_cmd(fmt,##__VA_ARGS__);\
 }while(0)
 

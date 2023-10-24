@@ -10,6 +10,7 @@
 #define NAME_TO_STR(_name)         (#_name)
 
 int dbg_level = LOG_LEVEL_MAX;
+char g_virtule_console[MAX_DEVICE_LEN+1];
 
 char* LogLevelToStr(int level)
 {
@@ -44,14 +45,15 @@ void va_printf(const char* fmt, ...)
 {
 	int fd;
 	char buffer[MAX_CMD_LEN+1] = {0};
+	char virtule_console[MAX_DEVICE_LEN+1] = {0};
 	va_list args;
 	va_start(args,fmt);
 	vsnprintf(buffer,MAX_CMD_LEN,fmt,args);
 	va_end(args);
-	//ps -el list this program's tty is pts/20
-	if((fd=open("/dev/pts/20",O_RDWR))<=0)
+	snprintf(virtule_console,MAX_DEVICE_LEN,"%s%s","/dev/",g_virtule_console);
+	if((fd=open(virtule_console,O_RDWR))<=0)
 	{
-		perror("open console failed!");
+		printf("open '%s' console failed!",virtule_console);
 		return;
 	}
 	write(fd,buffer, strlen(buffer));
@@ -59,15 +61,16 @@ void va_printf(const char* fmt, ...)
 }
 
 /*execute cmd and get all output in res if the length of result is less than MAX_CMD_LEN*/
-void _exec_get_res(const char *cmd,char *res)
+int module_exec_get_res(const char *cmd,char *res)
 {
 	FILE *fp = NULL;
 	char *p = NULL;
 
+	printf("%s\n",cmd);
 	if ( NULL == (fp=popen(cmd,"r")) )
 	{
-		LOG_ERR("popen failed!");
-		return;
+		printf("popen failed!\n");
+		return (-1);
 	}
 
 	char *str = res;
@@ -79,4 +82,6 @@ void _exec_get_res(const char *cmd,char *res)
 	if ( *p == '\n' || *p == '\r' )
 		*p = '\0';
 	fclose(fp);
+	printf("%s\n",res);
+	return 0;
 }
