@@ -7,6 +7,8 @@
 #include"log.h"
 
 #define DEFAULT_TIME                       1000/*s*/
+#define MAX_ERROR_TIMES                    5
+
 
 static module_cfg g_module_cfg;
 extern int dbg_level;
@@ -184,7 +186,7 @@ int_func(create_pid_file)
 	strlen(g_module_cfg.conf.author)<=0?memmove(author,DEFAULT_AUTHOR_NAME,strlen(DEFAULT_AUTHOR_NAME)):\
 		memmove(author,g_module_cfg.conf.author,AUTHOR_NAME_LEN);
 	snprintf(pid_file,MODULE_FILE_LEN,"%s%s.pid",MODULE_CODE_DIR,author);
-	LOG_WARN("pid_file=%s, pid=%d",pid_file, pid);
+	LOG_ERR("pid_file=%s, pid= %d",pid_file, pid);
 	fp = fopen(pid_file, "w+");
 	if(!fp)
 	{
@@ -198,27 +200,45 @@ int_func(create_pid_file)
 
 int_func(get_current_virtul_console)
 {
-	int len=0;
+	int len = 0;
+	int err_cnt = 0;
+	int need_repeat = 0;
 	FILE *fp;
 	char res[MAX_CMD_LEN+1]={0};
 
-	memset(g_virtule_console,0,MAX_DEVICE_LEN);
-	if(fp= popen("w|grep -w w| awk '{print $2}'","r"))
-	{
-		fgets(res,MAX_CMD_LEN,fp);
-		pclose(fp);
-
-		len=strlen(res);
-		while(len>0 && ('\n'==res[len-1] || '\t'==res[len-1] || ' '==res[len-1]))
-			res[(len--)-1] = '\0';
-
-		if(strlen(res))
+	memset(g_virtule_console,0,sizeof(g_virtule_console));
+	do{
+		if(fp= popen("w|grep -w w| awk '{print $2}'","r"))
 		{
-			memmove(g_virtule_console,res,strlen(res));
-			printf("[%s,%d]current virtual console is '%s%s'\n",__func__,__LINE__,"/dev/",g_virtule_console);
-			return OK;
+			fgets(res,MAX_CMD_LEN,fp);
+			pclose(fp);
+
+			len=strlen(res);
+			if(len<=0)
+			{
+				printf("[%s,%d]len=%d, need repeat\n",__FUNCTION__,__LINE__,len);
+				goto REPEAT;
+			}
+
+			while(len>0 && ('\n'==res[len-1] || '\t'==res[len-1] || ' '==res[len-1]))
+				res[(len--)-1] = '\0';
+
+			if(strlen(res))
+			{
+				memmove(g_virtule_console,res,strlen(res));
+				printf("[%s,%d]current virtual console is '%s%s'\n",__FUNCTION__,__LINE__,"/dev/",g_virtule_console);
+				return OK;
+			}
 		}
-	}
+		else
+		{
+			printf("[%s,%d]popen failed, need repeat\n",__FUNCTION__,__LINE__);
+		}
+REPEAT:
+		memset(res,0,sizeof(res));
+		err_cnt++;
+		need_repeat = 1;
+	}while(need_repeat && err_cnt<MAX_ERROR_TIMES);
 	return ERROR;
 }
 
