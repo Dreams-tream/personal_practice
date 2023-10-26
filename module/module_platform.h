@@ -29,7 +29,7 @@ typedef struct _module_config{
 
 typedef struct _module_callback{
 	void (*init_platform)();
-	void (*timer_loop)(struct _module_callback *);
+	void (*timer_loop)(module_config);
 	void (*event_loop)();
 	void (*exit)(module_config);
 }module_callback;
@@ -40,7 +40,7 @@ typedef struct _module_cfg{
 }module_cfg;
 
 void_func(platform_init_platform);
-void platform_timer_loop(module_callback *);
+void platform_timer_loop(module_config);
 void_func(platform_event_loop);
 void platform_exit(module_config);
 

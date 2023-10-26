@@ -12,10 +12,10 @@ void module_event_loop(module_callback *cb)
 		cb->event_loop();
 }
 
-void module_timer_loop(module_callback *cb)
+void module_timer_loop(module_cfg *cfg)
 {
-	if(cb->timer_loop)
-		cb->timer_loop(cb);
+	if(cfg->cb.timer_loop)
+		cfg->cb.timer_loop(cfg->conf);
 }
 
 void module_exit(module_cfg *cfg)

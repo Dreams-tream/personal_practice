@@ -18,7 +18,7 @@ void platform_init_platform()
 
 }
 
-void platform_timer_loop(module_callback *cb)
+void platform_timer_loop(module_config conf)
 {
 	int timer_fd;
 	int max_fd = 0;
@@ -48,7 +48,7 @@ void platform_timer_loop(module_callback *cb)
 	max_fd = (max_fd>timer_fd?max_fd:timer_fd);
 	new_time.it_value.tv_sec = now.tv_sec;
 	new_time.it_value.tv_nsec = now.tv_nsec;
-	new_time.it_interval.tv_sec = 0;
+	new_time.it_interval.tv_sec = conf.period;
 	new_time.it_interval.tv_nsec= LOOP_TIMEOUT_MICROSECOND * 1000;
 	timeout.tv_sec = 0;
 	timeout.tv_usec = LOOP_TIMEOUT_MICROSECOND;
@@ -64,7 +64,7 @@ void platform_timer_loop(module_callback *cb)
 	FD_SET(timer_fd,&readset);
 	for(total_time=0;;)
 	{
-		timeout.tv_sec = 0;
+		timeout.tv_sec = conf.period;
 		timeout.tv_usec = LOOP_TIMEOUT_MICROSECOND;
 
 		//int select(int nfds,fd_set* readset,fd_set* writeset,fe_set* exceptset,struct timeval* timeout);

@@ -6,7 +6,7 @@
 #include<json_object.h>
 #include"log.h"
 
-#define DEFAULT_PERIOD                     1/*s*/
+#define DEFAULT_PERIOD                     0/*s*/
 #define MAX_ERROR_TIMES                    5
 
 
@@ -285,7 +285,7 @@ int main(int argc, char **argv)
 	monitor_signal();
 	module_register_callbacks(&g_module_cfg.cb);
 	module_init_platform(&g_module_cfg.cb);
-	module_timer_loop(&g_module_cfg.cb);
+	module_timer_loop(&g_module_cfg);
 EXIT:
 	module_exit(&g_module_cfg);
 	return 0;
