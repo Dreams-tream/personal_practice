@@ -18,7 +18,7 @@ void platform_init_platform()
 
 }
 
-void platform_timer_loop()
+void platform_timer_loop(module_callback *cb)
 {
 	int timer_fd;
 	int max_fd = 0;
@@ -105,6 +105,14 @@ EXIT:
 void platform_event_loop()
 {
 
+}
+
+void platform_exit(module_config conf)
+{
+	if(strlen(conf.author))
+		module_exec_cmd("rm -f %s%s.*",MODULE_CODE_DIR,conf.author);
+	else
+		module_exec_cmd("rm -f %s%s.*",MODULE_CODE_DIR,DEFAULT_AUTHOR_NAME);
 }
 
 

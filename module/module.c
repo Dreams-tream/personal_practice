@@ -6,7 +6,7 @@
 #include<json_object.h>
 #include"log.h"
 
-#define DEFAULT_TIME                       1000/*s*/
+#define DEFAULT_PERIOD                     1/*s*/
 #define MAX_ERROR_TIMES                    5
 
 
@@ -18,9 +18,10 @@ int module_parse_parameter(int argc,char **argv,const char *optstring);
 void_func(USAGE);
 void_func(monitor_signal);
 void signal_process(int sig);
-int_func(create_pid_file);
+int_func(create_config_json_file);
 void_func(PRINT_MODULE_CONFIG);
 int_func(module_load_config);
+int_func(create_pid_file);
 int_func(get_current_virtul_console);
 
 int module_parse_parameter(int argc,char **argv,const char *optstring)
@@ -38,9 +39,9 @@ int module_parse_parameter(int argc,char **argv,const char *optstring)
 			memmove(g_module_cfg.conf.author,optarg,AUTHOR_NAME_LEN);
 			mask |= 0x01;
 			break;
-		case 's':
-			PRINT("seconds are %s",optarg);
-			g_module_cfg.conf.seconds=atoi(optarg);
+		case 'p':
+			PRINT("period is %s",optarg);
+			g_module_cfg.conf.period=atoi(optarg);
 			mask |= 0x10;
 		case 'h':
 			USAGE();
@@ -52,7 +53,7 @@ int module_parse_parameter(int argc,char **argv,const char *optstring)
 		}
 	}
 
-	if(mask & 0x11)
+	if(mask & 0x1)
 		PRINT_MODULE_CONFIG();
 	return ret;
 }
@@ -77,7 +78,7 @@ void signal_process(int sig)
 	case SIGTERM:
 	case SIGINT:
 		LOG_ERR("Exit this module");
-		module_exec_cmd("rm -f %s%s.*",MODULE_CODE_DIR,DEFAULT_AUTHOR_NAME);
+		module_exit(&g_module_cfg);
 		exit(0);
 	case SIGUSR1:
 		dbg_level<LOG_LEVEL_DEBUG?dbg_level++:0;
@@ -93,9 +94,11 @@ void signal_process(int sig)
 	}
 }
 
-int create_config_json_file(char *author,unsigned int seconds)
+int_func(create_config_json_file)
 {
 	int ret = OK;
+	int period = g_module_cfg.conf.period;
+	char *author = g_module_cfg.conf.author;
 	char empty_author[AUTHOR_NAME_LEN+1] = {0};
 	char conf_file[MODULE_FILE_LEN] = {0};
 	json_object *j_obj,*j_str,*j_int;
@@ -104,9 +107,9 @@ int create_config_json_file(char *author,unsigned int seconds)
 	if(!memcmp(author,empty_author,AUTHOR_NAME_LEN))
 	{
 		LOG_ERR("Author is empty! Use default!");
-		memmove(author,DEFAULT_AUTHOR_NAME,strlen(DEFAULT_AUTHOR_NAME));
+		author = DEFAULT_AUTHOR_NAME;
 	}
-	if(strlen(author)>AUTHOR_NAME_LEN)
+	if(strlen(author)<=0 || strlen(author)>AUTHOR_NAME_LEN)
 	{
 		LOG_ERR("Invalid author length!");
 		return ERROR;
@@ -120,7 +123,7 @@ int create_config_json_file(char *author,unsigned int seconds)
 		goto END;
 	}
 	json_object_object_add(j_obj,"author",json_object_new_string(author));
-	json_object_object_add(j_obj,"seconds",json_object_new_int(seconds>0?seconds:DEFAULT_TIME));
+	json_object_object_add(j_obj,"period",json_object_new_int(period>0?period:DEFAULT_PERIOD));
 	LOG_ERR("%s:%s",conf_file,json_object_to_json_string(j_obj));
 END:
 	if(j_obj){
@@ -134,13 +137,13 @@ END:
 void_func(PRINT_MODULE_CONFIG)
 {
 	LOG_DEBUG("author:%s",g_module_cfg.conf.author);
-	LOG_DEBUG("seconds:%u",g_module_cfg.conf.seconds);
+	LOG_DEBUG("period:%u%s",g_module_cfg.conf.period,"s");
 }
 
 int_func(module_load_config)
 {
 	FILE* fp = NULL;
-	int seconds = 0;
+	int period = 0;
 	char conf_file[MODULE_FILE_LEN+1] = {0};
 	char author[AUTHOR_NAME_LEN+1] = {0};
 	char *p_author = NULL;
@@ -150,10 +153,12 @@ int_func(module_load_config)
 	if(strlen(g_module_cfg.conf.author)>0)
 	{
 		memmove(author,g_module_cfg.conf.author,AUTHOR_NAME_LEN);
-		LOG_ERR("No config file! Use default");
 	}
 	else
+	{
 		snprintf(author,AUTHOR_NAME_LEN,"%s",DEFAULT_AUTHOR_NAME);
+		LOG_ERR("No config file! Use default");
+	}
 
 	snprintf(conf_file,MODULE_FILE_LEN,"%s%s%s",MODULE_CODE_DIR,author,CONFIG_FILE_POSTFIX);
 
@@ -167,11 +172,12 @@ int_func(module_load_config)
 
 	j_tmp = json_object_object_get(j_obj,"author");
 	p_author = json_object_get_string(j_tmp);
-	j_tmp = json_object_object_get(j_obj,"seconds");
-	seconds = json_object_get_int(j_tmp);
+	j_tmp = json_object_object_get(j_obj,"period");
+	period = json_object_get_int(j_tmp);
 
-	memmove(&g_module_cfg.conf.author,p_author,strlen(p_author));
-	g_module_cfg.conf.seconds = seconds;
+	if(strlen(g_module_cfg.conf.author)<=0)
+		memmove(&g_module_cfg.conf.author,p_author,strlen(p_author));
+	g_module_cfg.conf.period = period;
 	PRINT_MODULE_CONFIG();
 	return OK;
 }
@@ -206,7 +212,6 @@ int_func(get_current_virtul_console)
 	FILE *fp;
 	char res[MAX_CMD_LEN+1]={0};
 
-	memset(g_virtule_console,0,sizeof(g_virtule_console));
 	do{
 		if(fp= popen("w|grep -w w| awk '{print $2}'","r"))
 		{
@@ -244,8 +249,8 @@ REPEAT:
 
 int main(int argc, char **argv)
 {
-	char author[AUTHOR_NAME_LEN+1] = {0};
-	unsigned int seconds = DEFAULT_TIME;
+	memset(&g_module_cfg,0,sizeof(g_module_cfg));
+	memset(g_virtule_console,0,sizeof(g_virtule_console));
 
 	if(ERROR==get_current_virtul_console())
 	{
@@ -253,30 +258,35 @@ int main(int argc, char **argv)
 		return ERROR;
 	}
 
-	if(ERROR==module_parse_parameter(argc,argv,"a:s:h"))
+	if(ERROR==module_parse_parameter(argc,argv,"a:p:h"))
 	{
 		LOG_ERR("parse parameter failed!");
-		return ERROR;
+		goto EXIT;
 	}
 
-	monitor_signal();
-	if(ERROR==create_config_json_file(author,seconds))
+	if(ERROR==create_config_json_file())
 	{
 		LOG_ERR("Create config file error!");
-		return ERROR;
+		goto EXIT;
 	}
 
-	memset(&g_module_cfg,0,sizeof(g_module_cfg));
-	module_load_config();
+	if(ERROR==module_load_config())
+	{
+		LOG_ERR("load config file error!");
+		goto EXIT;
+	}
 
 	if(ERROR==create_pid_file())
 	{
 		LOG_ERR("Create pid file error!");
-		return ERROR;
+		goto EXIT;
 	}
 
+	monitor_signal();
 	module_register_callbacks(&g_module_cfg.cb);
 	module_init_platform(&g_module_cfg.cb);
 	module_timer_loop(&g_module_cfg.cb);
+EXIT:
+	module_exit(&g_module_cfg);
 	return 0;
 }

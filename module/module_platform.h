@@ -12,20 +12,38 @@
 #define int_func(_func)                int _func(void)
 #define int_ptr_func(_func)            int* _func(void)
 
-typedef struct module_config{
-	char author[AUTHOR_NAME_LEN+1];
-	int seconds;
-}module_config;
-
 enum{
 	ERROR = -1,
 	OK = 0,
 };
 
+typedef enum _event_type{
+	EVENT_TYPE_MIN,
+	EVENT_TYPE_MAX,
+}event_type;
+
+typedef struct _module_config{
+	char author[AUTHOR_NAME_LEN+1];
+	int period;
+}module_config;
+
+typedef struct _module_callback{
+	void (*init_platform)();
+	void (*timer_loop)(struct _module_callback *);
+	void (*event_loop)();
+	void (*exit)(module_config);
+}module_callback;
+
+typedef struct _module_cfg{
+	module_config   conf;
+	module_callback cb;
+}module_cfg;
 
 void_func(platform_init_platform);
-void_func(platform_timer_loop);
+void platform_timer_loop(module_callback *);
 void_func(platform_event_loop);
+void platform_exit(module_config);
+
 
 
 #endif
