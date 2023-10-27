@@ -4,7 +4,7 @@
 #include "module_common.h"
 
 #define MODULE_CODE_DIR                         "/home/yangcuilang/C_Code/module/"
-#define DEFAULT_AUTHOR_NAME                     "YCL"
+#define DEFAULT_AUTHOR_NAME                     "Yang Cuilang"
 #define CONFIG_FILE_POSTFIX                     ".cfg"
 #define AUTHOR_NAME_LEN                         30
 #define MODULE_FILE_LEN                         100

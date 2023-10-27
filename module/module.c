@@ -92,7 +92,7 @@ HELP:
 	return OK;
 }
 
-void_func(USAGE)
+void USAGE()
 {
 	int log_level = 0;
 	PRINT("======================================================================================");
@@ -107,7 +107,7 @@ void_func(USAGE)
 	PRINT("======================================================================================");
 }
 
-void_func(monitor_signal)
+void monitor_signal()
 {
 	signal(SIGINT,  signal_process);
 	signal(SIGTERM, signal_process);
@@ -134,27 +134,23 @@ void signal_process(int sig)
 	}
 }
 
-int_func(create_config_json_file)
+int create_config_json_file()
 {
 	int ret = OK;
 	int second = g_module_cfg.conf.second;
 	int millisecond = g_module_cfg.conf.millisecond;
-	char *author = g_module_cfg.conf.author;
-	char empty_author[AUTHOR_NAME_LEN+1] = {0};
+	char author[AUTHOR_NAME_LEN+1] = {0};
 	char conf_file[MODULE_FILE_LEN] = {0};
 	json_object *j_obj,*j_str,*j_int;
 
 	j_obj=j_str=j_int=NULL;
-	if(!memcmp(author,empty_author,AUTHOR_NAME_LEN))
+	if(!strlen(g_module_cfg.conf.author))
 	{
-		LOG_ERR("Author is empty! Use default!");
-		author = DEFAULT_AUTHOR_NAME;
-	}
-	if(strlen(author)<=0 || strlen(author)>AUTHOR_NAME_LEN)
-	{
-		LOG_ERR("Invalid author length!");
-		return ERROR;
-	}
+		memmove(author,DEFAULT_AUTHOR_NAME,AUTHOR_NAME_LEN);
+		str_replace(author,' ','_');
+		LOG_ERR("No author argument input! Use default author!");
+	}else
+		memmove(author,g_module_cfg.conf.author,AUTHOR_NAME_LEN);
 
 	snprintf(conf_file,MODULE_FILE_LEN-1,"%s%s%s",MODULE_CODE_DIR,author,CONFIG_FILE_POSTFIX);
 	j_obj = json_object_new_object();//json_object_put
@@ -176,14 +172,14 @@ END:
 	return ret;
 }
 
-void_func(PRINT_MODULE_CONFIG)
+void PRINT_MODULE_CONFIG()
 {
-	LOG_DEBUG("author:%s",g_module_cfg.conf.author);
-	LOG_DEBUG("second:%us",g_module_cfg.conf.second);
-	LOG_DEBUG("millisecond:%ums",g_module_cfg.conf.millisecond);
+	LOG_ERR("author:%s",g_module_cfg.conf.author);
+	LOG_ERR("second:%us",g_module_cfg.conf.second);
+	LOG_ERR("millisecond:%ums",g_module_cfg.conf.millisecond);
 }
 
-int_func(module_load_config)
+int module_load_config()
 {
 	int second = 0;
 	int millisecond = 0;
@@ -200,9 +196,9 @@ int_func(module_load_config)
 	else
 	{
 		snprintf(author,AUTHOR_NAME_LEN,"%s",DEFAULT_AUTHOR_NAME);
-		LOG_ERR("No config file! Use default");
 	}
 
+	str_replace(author,' ','_');
 	snprintf(conf_file,MODULE_FILE_LEN,"%s%s%s",MODULE_CODE_DIR,author,CONFIG_FILE_POSTFIX);
 
 	j_obj = j_tmp = NULL;
@@ -229,7 +225,7 @@ int_func(module_load_config)
 	return OK;
 }
 
-int_func(create_pid_file)
+int create_pid_file()
 {
 	FILE *fp = NULL;
 	pid_t pid = getpid();
@@ -251,7 +247,7 @@ int_func(create_pid_file)
 	return OK;
 }
 
-int_func(get_current_virtul_console)
+int get_current_virtul_console()
 {
 	int len = 0;
 	int err_cnt = 0;

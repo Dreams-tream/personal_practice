@@ -107,10 +107,12 @@ void platform_event_loop()
 
 void platform_exit(module_config conf)
 {
+	char author[AUTHOR_NAME_LEN+1]=DEFAULT_AUTHOR_NAME;
+
 	if(strlen(conf.author))
 		module_exec_cmd("rm -f %s%s.*",MODULE_CODE_DIR,conf.author);
 	else
-		module_exec_cmd("rm -f %s%s.*",MODULE_CODE_DIR,DEFAULT_AUTHOR_NAME);
+		module_exec_cmd("rm -f %s%s.*",MODULE_CODE_DIR,str_replace(author,' ','_'));
 }
 
 
