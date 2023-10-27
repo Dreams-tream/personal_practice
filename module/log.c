@@ -7,13 +7,37 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <signal.h>
 
 #define NAME_TO_STR(_name)         (#_name)
 
-int dbg_level = LOG_LEVEL_ERROR;
+static int s_log_level = LOG_LEVEL_ERROR;
 char g_virtule_console[MAX_DEVICE_LEN+1];
 
-char* LogLevelToStr(int level)
+int get_log_level()
+{
+	return s_log_level;
+}
+
+void modify_log_level(int sig, int log_level)
+{
+	if(SIGUSR1==sig)
+	{
+		s_log_level<LOG_LEVEL_DEBUG?s_log_level++:0;
+		LOG_ERR("Increase log level to %s", LogLevelToStr(s_log_level));
+	}else if(SIGUSR2==sig)
+	{
+		s_log_level>LOG_LEVEL_ERROR?s_log_level--:0;
+		LOG_ERR("Decrease log level to %s", LogLevelToStr(s_log_level));
+	}else
+	{
+		s_log_level = (log_level>LOG_LEVEL_DEBUG?LOG_LEVEL_DEBUG:\
+			(log_level<LOG_LEVEL_ERROR?LOG_LEVEL_ERROR:log_level));
+		LOG_ERR("Set log level to %s", LogLevelToStr(s_log_level));
+	}
+}
+
+char* LogLevelToStr(int log_level)
 {
 	char* log_level_str[LOG_LEVEL_MAX] = {
 		[LOG_LEVEL_ERROR] = "LOG_LEVEL_ERROR",
@@ -22,13 +46,13 @@ char* LogLevelToStr(int level)
 		[LOG_LEVEL_DEBUG] = "LOG_LEVEL_DEBUG"
 	};
 
-	if(level<LOG_LEVEL_ERROR)
+	if(log_level<LOG_LEVEL_ERROR)
 		return log_level_str[LOG_LEVEL_ERROR];
 
-	if(level>LOG_LEVEL_DEBUG)
+	if(log_level>LOG_LEVEL_DEBUG)
 		return log_level_str[LOG_LEVEL_DEBUG];
 
-	return log_level_str[level];
+	return log_level_str[log_level];
 }
 
 void va_exec_cmd(const char* fmt, ...)

@@ -12,7 +12,6 @@
 #define MAX_ERROR_TIMES                    5
 
 static module_cfg g_module_cfg;
-extern int dbg_level;
 extern char g_virtule_console[MAX_DEVICE_LEN];
 
 int module_parse_parameter(int argc,char **argv,const char *optstring);
@@ -28,23 +27,29 @@ int_func(get_current_virtul_console);
 int module_parse_parameter(int argc,char **argv,const char *optstring)
 {
 	int opt;
+	int log_level;
 
 	while((opt = getopt(argc,argv,optstring)) != ERROR)
 	{
 		switch(opt)
 		{
 		case 'a':
-			LOG_ERR("author is %s",optarg);
+			LOG_DEBUG("author is %s",optarg);
 			memmove(g_module_cfg.conf.author,optarg,AUTHOR_NAME_LEN);
 			str_replace(g_module_cfg.conf.author,' ','_');
 			break;
 		case 's':
-			LOG_ERR("second is %s",optarg);
+			LOG_DEBUG("second is %s",optarg);
 			g_module_cfg.conf.second=atoi(optarg);
 			break;
 		case 'm':
-			LOG_ERR("millisecond is %s",optarg);
+			LOG_DEBUG("millisecond is %s",optarg);
 			g_module_cfg.conf.millisecond = atoi(optarg);
+			break;
+		case 'l':
+			log_level = atoi(optarg);
+			LOG_DEBUG("log level is %s",LogLevelToStr(log_level));
+			modify_log_level(0,log_level);
 			break;
 		case 'h':
 		default:
@@ -60,12 +65,17 @@ int module_parse_parameter(int argc,char **argv,const char *optstring)
 
 void_func(USAGE)
 {
-	PRINT("==================================================================================");
-	PRINT("Module:");
-	PRINT("-a [author]        input author's name");
-	PRINT("-s [second]        input second to determine timer period of unit second");
-	PRINT("-m [millisecond]   input millisecond to determine timer period of unit millisecond");
-	PRINT("==================================================================================");
+	int log_level = 0;
+	PRINT("======================================================================================");
+	PRINT("Help Information:");
+	PRINT("    -a [author]        input author's name");
+	PRINT("    -h                 print help information");
+	PRINT("    -s [second]        input second to determine timer period of unit second");
+	PRINT("    -l [log_level]     change log_level to increase/decrease debug information");
+	for(log_level=0;log_level<LOG_LEVEL_MAX;log_level++)
+		PRINT("                       %d: %s",log_level,LogLevelToStr(log_level));
+	PRINT("    -m [millisecond]   input millisecond to determine timer period of unit millisecond");
+	PRINT("======================================================================================");
 }
 
 void_func(monitor_signal)
@@ -86,12 +96,8 @@ void signal_process(int sig)
 		module_exit(&g_module_cfg);
 		exit(0);
 	case SIGUSR1:
-		dbg_level<LOG_LEVEL_DEBUG?dbg_level++:0;
-		LOG_ERR("Increase log level to %s", LogLevelToStr(dbg_level));
-		break;
 	case SIGUSR2:
-		dbg_level>LOG_LEVEL_ERROR?dbg_level--:0;
-		LOG_ERR("Decrease log level to %s", LogLevelToStr(dbg_level));
+		modify_log_level(sig,0);
 		break;
 	default:
 		LOG_ERR("Unknown signal, break");
@@ -270,7 +276,7 @@ int main(int argc, char **argv)
 		return ERROR;
 	}
 
-	if(ERROR==module_parse_parameter(argc,argv,"a:s:m:h"))
+	if(ERROR==module_parse_parameter(argc,argv,"a:s:m:l:h"))
 	{
 		LOG_ERR("parse parameter failed!");
 		goto EXIT;

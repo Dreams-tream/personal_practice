@@ -9,8 +9,6 @@
 #include <stdint.h>        /* Definition of uint64_t */
 #include"log.h"
 
-extern int dbg_level;
-
 void platform_init_platform()
 {
 
