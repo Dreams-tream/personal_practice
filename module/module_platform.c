@@ -1,10 +1,11 @@
 #include"module_platform.h"
 #include <sys/select.h>
 #include <sys/timerfd.h>
+#include <unistd.h>
 #include <time.h>
-//#include <unistd.h>
-//#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdint.h>        /* Definition of uint64_t */
 #include"log.h"
 

@@ -1,9 +1,12 @@
-#include"module.h"
-#include<stdio.h>
-#include<signal.h>
+#include "module.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <unistd.h>                  /*Definition of getopt()*/
-#include<json_object.h>
+#include <json_object.h>
+#include<json_util.h>
 #include"log.h"
 
 #define MAX_ERROR_TIMES                    5
@@ -144,12 +147,11 @@ void_func(PRINT_MODULE_CONFIG)
 
 int_func(module_load_config)
 {
-	FILE* fp = NULL;
 	int second = 0;
 	int millisecond = 0;
 	char conf_file[MODULE_FILE_LEN+1] = {0};
 	char author[AUTHOR_NAME_LEN+1] = {0};
-	char *p_author = NULL;
+	const char *p_author = NULL;
 	json_object *j_obj,*j_tmp;
 
 
@@ -220,7 +222,7 @@ int_func(get_current_virtul_console)
 	char res[MAX_CMD_LEN+1]={0};
 
 	do{
-		if(fp= popen("w|grep -w w| awk '{print $2}'","r"))
+		if((fp= popen("w|grep -w w| awk '{print $2}'","r")))
 		{
 			fgets(res,MAX_CMD_LEN,fp);
 			pclose(fp);
