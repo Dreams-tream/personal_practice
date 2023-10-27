@@ -28,41 +28,44 @@ int_func(get_current_virtul_console);
 int module_parse_parameter(int argc,char **argv,const char *optstring)
 {
 	int opt;
-	int ret = OK;
 
 	while((opt = getopt(argc,argv,optstring)) != ERROR)
 	{
 		switch(opt)
 		{
 		case 'a':
-			PRINT("author is %s",optarg);
+			LOG_ERR("author is %s",optarg);
 			memmove(g_module_cfg.conf.author,optarg,AUTHOR_NAME_LEN);
 			str_replace(g_module_cfg.conf.author,' ','_');
 			break;
 		case 's':
-			PRINT("second is %s",optarg);
+			LOG_ERR("second is %s",optarg);
 			g_module_cfg.conf.second=atoi(optarg);
 			break;
 		case 'm':
-			PRINT("millisecond is %s",optarg);
+			LOG_ERR("millisecond is %s",optarg);
 			g_module_cfg.conf.millisecond = atoi(optarg);
 			break;
 		case 'h':
-			USAGE();
-			break;
 		default:
-			PRINT("unkonwn command: '%c'",opt);
-			ret = ERROR;
-			break;
+			if('h' != opt)
+				LOG_ERR("unkonwn option: '%c'",opt);
+			USAGE();
+			return ERROR;
 		}
 	}
 
-	return ret;
+	return OK;
 }
 
 void_func(USAGE)
 {
-
+	PRINT("==================================================================================");
+	PRINT("Module:");
+	PRINT("-a [author]        input author's name");
+	PRINT("-s [second]        input second to determine timer period of unit second");
+	PRINT("-m [millisecond]   input millisecond to determine timer period of unit millisecond");
+	PRINT("==================================================================================");
 }
 
 void_func(monitor_signal)

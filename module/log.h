@@ -22,7 +22,7 @@ int module_exec_get_res(const char *cmd,char *res);
 	va_exec_cmd(fmt,##__VA_ARGS__);\
 }while(0)
 
-#define PRINT(fmt,args...) va_printf("[%s,%d]"fmt"\n",__func__,__LINE__,##args)
+#define PRINT(fmt,args...) va_printf(fmt"\n",##args)
 
 #define LOG_ERR(fmt, ...) do{\
 	if ( dbg_level >= LOG_LEVEL_ERROR )\
