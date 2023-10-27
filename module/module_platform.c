@@ -8,9 +8,6 @@
 #include <stdint.h>        /* Definition of uint64_t */
 #include"log.h"
 
-#define LOOP_TIMEOUT_MILLISECOND                       (500) /*ms*/
-#define LOOP_TIMEOUT_MICROSECOND                       LOOP_TIMEOUT_MILLISECOND*1000  /*us*/
-
 extern int dbg_level;
 
 void platform_init_platform()
@@ -26,6 +23,7 @@ void platform_timer_loop(module_config conf)
 	int select_res = -1;
 	fd_set readset;
 	uint64_t total_time,expire_time;
+	long u_sec = 0;
 	struct timespec now;
 	struct itimerspec new_time;
 	struct timeval timeout;
@@ -46,12 +44,13 @@ void platform_timer_loop(module_config conf)
 	}
 
 	max_fd = (max_fd>timer_fd?max_fd:timer_fd);
+	timeout.tv_sec = conf.second;
+	u_sec = conf.millisecond>0?conf.millisecond * 1000:LOOP_TIMEOUT_MICROSECOND;
 	new_time.it_value.tv_sec = now.tv_sec;
 	new_time.it_value.tv_nsec = now.tv_nsec;
-	new_time.it_interval.tv_sec = conf.period;
-	new_time.it_interval.tv_nsec= LOOP_TIMEOUT_MICROSECOND * 1000;
-	timeout.tv_sec = 0;
-	timeout.tv_usec = LOOP_TIMEOUT_MICROSECOND;
+	new_time.it_interval.tv_sec = timeout.tv_sec;
+	new_time.it_interval.tv_nsec= u_sec * 1000;
+	LOG_ERR("timer period: %lus %lums",timeout.tv_sec,u_sec/1000);
 
 	//set timeout to control time
 	if(-1 == timerfd_settime(timer_fd,TFD_TIMER_ABSTIME, &new_time, NULL))
@@ -64,8 +63,8 @@ void platform_timer_loop(module_config conf)
 	FD_SET(timer_fd,&readset);
 	for(total_time=0;;)
 	{
-		timeout.tv_sec = conf.period;
-		timeout.tv_usec = LOOP_TIMEOUT_MICROSECOND;
+		timeout.tv_sec = conf.second;
+		timeout.tv_usec = u_sec;
 
 		//int select(int nfds,fd_set* readset,fd_set* writeset,fe_set* exceptset,struct timeval* timeout);
 		select_res = select(max_fd+1,&readset,NULL,NULL,&timeout);

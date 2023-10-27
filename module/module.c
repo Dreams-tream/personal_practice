@@ -6,9 +6,7 @@
 #include<json_object.h>
 #include"log.h"
 
-#define DEFAULT_PERIOD                     0/*s*/
 #define MAX_ERROR_TIMES                    5
-
 
 static module_cfg g_module_cfg;
 extern int dbg_level;
@@ -28,7 +26,6 @@ int module_parse_parameter(int argc,char **argv,const char *optstring)
 {
 	int opt;
 	int ret = OK;
-	int mask = 0;
 
 	while((opt = getopt(argc,argv,optstring)) != ERROR)
 	{
@@ -38,17 +35,20 @@ int module_parse_parameter(int argc,char **argv,const char *optstring)
 			PRINT("author is %s",optarg);
 			memmove(g_module_cfg.conf.author,optarg,AUTHOR_NAME_LEN);
 			str_replace(g_module_cfg.conf.author,' ','_');
-			mask |= 0x01;
 			break;
-		case 'p':
-			PRINT("period is %s",optarg);
-			g_module_cfg.conf.period=atoi(optarg);
-			mask |= 0x10;
+		case 's':
+			PRINT("second is %s",optarg);
+			g_module_cfg.conf.second=atoi(optarg);
+			break;
+		case 'm':
+			PRINT("millisecond is %s",optarg);
+			g_module_cfg.conf.millisecond = atoi(optarg);
+			break;
 		case 'h':
 			USAGE();
 			break;
 		default:
-			PRINT("unkonwn command!");
+			PRINT("unkonwn command: '%c'",opt);
 			ret = ERROR;
 			break;
 		}
@@ -96,7 +96,8 @@ void signal_process(int sig)
 int_func(create_config_json_file)
 {
 	int ret = OK;
-	int period = g_module_cfg.conf.period;
+	int second = g_module_cfg.conf.second;
+	int millisecond = g_module_cfg.conf.millisecond;
 	char *author = g_module_cfg.conf.author;
 	char empty_author[AUTHOR_NAME_LEN+1] = {0};
 	char conf_file[MODULE_FILE_LEN] = {0};
@@ -115,14 +116,15 @@ int_func(create_config_json_file)
 	}
 
 	snprintf(conf_file,MODULE_FILE_LEN-1,"%s%s%s",MODULE_CODE_DIR,author,CONFIG_FILE_POSTFIX);
-	j_obj = json_object_new_object();
+	j_obj = json_object_new_object();//json_object_put
 	if(NULL==j_obj)
 	{
 		ret = ERROR;
 		goto END;
 	}
 	json_object_object_add(j_obj,"author",json_object_new_string(author));
-	json_object_object_add(j_obj,"period",json_object_new_int(period>0?period:DEFAULT_PERIOD));
+	json_object_object_add(j_obj,"second",json_object_new_int(second>0?second:LOOP_TIMEOUT_SECOND));
+	json_object_object_add(j_obj,"millisecond",json_object_new_int(millisecond>0?millisecond:LOOP_TIMEOUT_MILLISECOND));
 	LOG_ERR("%s:%s",conf_file,json_object_to_json_string(j_obj));
 END:
 	if(j_obj){
@@ -136,13 +138,15 @@ END:
 void_func(PRINT_MODULE_CONFIG)
 {
 	LOG_DEBUG("author:%s",g_module_cfg.conf.author);
-	LOG_DEBUG("period:%u%s",g_module_cfg.conf.period,"s");
+	LOG_DEBUG("second:%us",g_module_cfg.conf.second);
+	LOG_DEBUG("millisecond:%ums",g_module_cfg.conf.millisecond);
 }
 
 int_func(module_load_config)
 {
 	FILE* fp = NULL;
-	int period = 0;
+	int second = 0;
+	int millisecond = 0;
 	char conf_file[MODULE_FILE_LEN+1] = {0};
 	char author[AUTHOR_NAME_LEN+1] = {0};
 	char *p_author = NULL;
@@ -162,7 +166,7 @@ int_func(module_load_config)
 	snprintf(conf_file,MODULE_FILE_LEN,"%s%s%s",MODULE_CODE_DIR,author,CONFIG_FILE_POSTFIX);
 
 	j_obj = j_tmp = NULL;
-	j_obj = json_object_from_file(conf_file);
+	j_obj = json_object_from_file(conf_file);//json_object_put
 	if(NULL==j_obj)
 	{
 		LOG_ERR("Read json from config file fail");
@@ -171,13 +175,17 @@ int_func(module_load_config)
 
 	j_tmp = json_object_object_get(j_obj,"author");
 	p_author = json_object_get_string(j_tmp);
-	j_tmp = json_object_object_get(j_obj,"period");
-	period = json_object_get_int(j_tmp);
+	j_tmp = json_object_object_get(j_obj,"second");
+	second = json_object_get_int(j_tmp);
+	j_tmp = json_object_object_get(j_obj,"millisecond");
+	millisecond = json_object_get_int(j_tmp);
 
 	if(strlen(g_module_cfg.conf.author)<=0)
 		memmove(&g_module_cfg.conf.author,p_author,strlen(p_author));
-	g_module_cfg.conf.period = period;
+	g_module_cfg.conf.second = second;
+	g_module_cfg.conf.millisecond = millisecond;
 	PRINT_MODULE_CONFIG();
+	json_object_put(j_obj);
 	return OK;
 }
 
@@ -257,7 +265,7 @@ int main(int argc, char **argv)
 		return ERROR;
 	}
 
-	if(ERROR==module_parse_parameter(argc,argv,"a:p:h"))
+	if(ERROR==module_parse_parameter(argc,argv,"a:s:m:h"))
 	{
 		LOG_ERR("parse parameter failed!");
 		goto EXIT;

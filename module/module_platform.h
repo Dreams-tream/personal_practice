@@ -8,6 +8,9 @@
 #define CONFIG_FILE_POSTFIX                     ".cfg"
 #define AUTHOR_NAME_LEN                         30
 #define MODULE_FILE_LEN                         100
+#define LOOP_TIMEOUT_SECOND                     0/*s*/
+#define LOOP_TIMEOUT_MILLISECOND                (500) /*ms*/
+#define LOOP_TIMEOUT_MICROSECOND                LOOP_TIMEOUT_MILLISECOND*1000  /*us*/
 
 #define void_func(_func)               void _func(void)
 #define void_ptr_func(_func)           void* _func(void)
@@ -20,8 +23,9 @@ typedef enum _event_type{
 }event_type;
 
 typedef struct _module_config{
+	int second;
+	int millisecond;
 	char author[AUTHOR_NAME_LEN+1];
-	int period;
 }module_config;
 
 typedef struct _module_callback{
