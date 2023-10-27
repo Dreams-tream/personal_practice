@@ -8,7 +8,7 @@ PWD = $(shell pwd)
 SRC_FILE = $(shell ls $(PWD))
 #SRC_CODE = $(wildcard $(PWD)/*.c)
 SRC_CODE = $(filter %.c %.h,$(SRC_FILE))
-COMPILE_SRC =  module.c   module_callback.c module_platform.c log.c
+COMPILE_SRC =  module.c   module_callback.c module_platform.c module_common.c log.c
 
 .PHONY: all clean
 
@@ -25,9 +25,6 @@ $(TARGET) : $(SRC_CODE)
 clean :
 	rm -f $(PWD)/$(TARGET)* $(PWD)/.pid $(PWD)/*.pid
 
-
-
-#log.c module.c  module_callback.c  module_platform.c
 
 
 

@@ -1,6 +1,8 @@
 #ifndef _MODULE_PLATFORM_H
 #define _MODULE_PLATFORM_H
 
+#include "module_common.h"
+
 #define MODULE_CODE_DIR                         "/home/yangcuilang/C_Code/module/"
 #define DEFAULT_AUTHOR_NAME                     "YCL"
 #define CONFIG_FILE_POSTFIX                     ".cfg"
@@ -11,11 +13,6 @@
 #define void_ptr_func(_func)           void* _func(void)
 #define int_func(_func)                int _func(void)
 #define int_ptr_func(_func)            int* _func(void)
-
-enum{
-	ERROR = -1,
-	OK = 0,
-};
 
 typedef enum _event_type{
 	EVENT_TYPE_MIN,

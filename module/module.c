@@ -37,6 +37,7 @@ int module_parse_parameter(int argc,char **argv,const char *optstring)
 		case 'a':
 			PRINT("author is %s",optarg);
 			memmove(g_module_cfg.conf.author,optarg,AUTHOR_NAME_LEN);
+			str_replace(g_module_cfg.conf.author,' ','_');
 			mask |= 0x01;
 			break;
 		case 'p':
@@ -53,8 +54,6 @@ int module_parse_parameter(int argc,char **argv,const char *optstring)
 		}
 	}
 
-	if(mask & 0x1)
-		PRINT_MODULE_CONFIG();
 	return ret;
 }
 
