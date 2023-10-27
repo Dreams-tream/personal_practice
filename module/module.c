@@ -34,29 +34,58 @@ int module_parse_parameter(int argc,char **argv,const char *optstring)
 		switch(opt)
 		{
 		case 'a':
-			LOG_DEBUG("author is %s",optarg);
-			memmove(g_module_cfg.conf.author,optarg,AUTHOR_NAME_LEN);
-			str_replace(g_module_cfg.conf.author,' ','_');
+			if(strlen(optarg))
+			{
+				LOG_DEBUG("author is %s",optarg);
+				memmove(g_module_cfg.conf.author,optarg,AUTHOR_NAME_LEN);
+				str_replace(g_module_cfg.conf.author,' ','_');
+			}else
+			{
+				LOG_ERR("invalid length of author");
+				goto HELP;
+			}
 			break;
 		case 's':
-			LOG_DEBUG("second is %s",optarg);
-			g_module_cfg.conf.second=atoi(optarg);
+			if(strspn(optarg, "0123456789") == strlen(optarg))
+			{
+				LOG_DEBUG("second is %s",optarg);
+				g_module_cfg.conf.second=atoi(optarg);
+			}else
+			{
+				LOG_ERR("%s: invalid number",optarg);
+				goto HELP;
+			}
 			break;
 		case 'm':
-			LOG_DEBUG("millisecond is %s",optarg);
-			g_module_cfg.conf.millisecond = atoi(optarg);
+			if(strspn(optarg, "0123456789") == strlen(optarg))
+			{
+				LOG_DEBUG("millisecond is %s",optarg);
+				g_module_cfg.conf.millisecond = atoi(optarg);
+			}else
+			{
+				LOG_ERR("%s: invalid number",optarg);
+				goto HELP;
+			}
 			break;
 		case 'l':
-			log_level = atoi(optarg);
-			LOG_DEBUG("log level is %s",LogLevelToStr(log_level));
-			modify_log_level(0,log_level);
+			if(strspn(optarg, "0123456789") == strlen(optarg))
+			{
+				log_level = atoi(optarg);
+				LOG_DEBUG("log level is %s",LogLevelToStr(log_level));
+				modify_log_level(0,log_level);
+			}else
+			{
+				LOG_ERR("please input right log level");
+				goto HELP;
+			}
 			break;
+HELP:
 		case 'h':
 		default:
-			if('h' != opt)
+			if(':'==opt || !strchr(optstring,opt))
 				LOG_ERR("unkonwn option: '%c'",opt);
 			USAGE();
-			return ERROR;
+			exit(-1);
 		}
 	}
 
