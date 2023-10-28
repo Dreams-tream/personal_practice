@@ -253,10 +253,12 @@ int get_current_virtul_console()
 	int err_cnt = 0;
 	int need_repeat = 0;
 	FILE *fp;
+	char cmd[MAX_CMD_LEN+1]={0};
 	char res[MAX_CMD_LEN+1]={0};
 
+	snprintf(cmd,MAX_CMD_LEN,"w|grep -Ew 'w|%s' | awk '{print $2}'",MODULE_NAME);
 	do{
-		if((fp= popen("w|grep -w w| awk '{print $2}'","r")))
+		if((fp= popen(cmd,"r")))
 		{
 			fgets(res,MAX_CMD_LEN,fp);
 			pclose(fp);
