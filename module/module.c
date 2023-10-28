@@ -75,7 +75,7 @@ int module_parse_parameter(int argc,char **argv,const char *optstring)
 				modify_log_level(0,log_level);
 			}else
 			{
-				LOG_ERR("please input right log level");
+				LOG_ERR("%s: please input right log level",optarg);
 				goto HELP;
 			}
 			break;
