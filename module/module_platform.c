@@ -7,7 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>        /* Definition of uint64_t */
-#include"log.h"
+#include "log.h"
+#include "platform_src/platform.h"
 
 void platform_init_platform()
 {
@@ -77,6 +78,7 @@ void platform_timer_loop(module_config conf)
 					total_time += expire_time;
 					LOG_DEBUG("total_time=%llu, expire_time=%llu",
 						(unsigned long long)total_time,(unsigned long long)expire_time);
+					timer_do_something();
 					continue;
 				}
 				LOG_ERR("Read timer_fd failed");
@@ -86,6 +88,7 @@ void platform_timer_loop(module_config conf)
 		else if(0==select_res)
 		{
 			LOG_INFO("reach timeout value %ds %dus",timeout.tv_sec,timeout.tv_usec);
+			timer_do_something();
 		}
 		else
 		{
