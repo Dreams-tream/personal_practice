@@ -9,7 +9,7 @@ function start()
 
 stop()
 {
-	killall ${module_name}
+	ps -e |grep ${module_name} && killall ${module_name}
 }
 
 function print
@@ -18,6 +18,14 @@ function print
 	echo "all argument is $*, the number of argument is $#"
 }
 
+compile()
+{
+	make
+	chmod -x *.c *.h
+	chmod +x *.sh
+}
+
+compile
 stop
 print $*
 start $*
