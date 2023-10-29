@@ -75,7 +75,8 @@ void va_printf(const char* fmt, ...)
 	va_start(args,fmt);
 	vsnprintf(buffer,MAX_CMD_LEN,fmt,args);
 	va_end(args);
-	snprintf(virtule_console,MAX_DEVICE_LEN,"%s%s","/dev/",g_virtule_console);
+	/*In fact, /dev/tty points to current terminal*/
+	snprintf(virtule_console,MAX_DEVICE_LEN,"%s%s","/dev/","tty"/*g_virtule_console*/);
 	if((fd=open(virtule_console,O_RDWR))<=0)
 	{
 		perror("open console failed!");
