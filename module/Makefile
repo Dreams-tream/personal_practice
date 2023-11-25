@@ -1,5 +1,6 @@
 #compile this program MODULE and iterable small program module
-.PHONY: all clean
+include module.config
+
 CC = gcc
 CFLAGS += -Wall
 CFLAGS += $(shell pkg-config --cflags json-c)
@@ -18,6 +19,18 @@ PLATFORM_DIR = $(PWD)/platform_src
 PLATFORM_SRC = $(PLATFORM_DIR)/platform.c
 PLATFORM_CFLAGS = -Wall -I$(PLATFORM_DIR)
 
+ifdef CONFIG_AUTHOR_NAME_SUPPORT
+ifeq ($(CONFIG_AUTHOR_NAME_SUPPORT),y)
+  CFLAGS += -DCONFIG_AUTHOR_NAME_SUPPORT
+ifneq ($(CONFIG_AUTHOR_NAME),)
+  #create author name config file
+  AUTHOR_NAME = $(CONFIG_AUTHOR_NAME)
+endif
+endif
+endif
+
+.PHONY: all clean
+
 all: $(TARGET)
 
 #$(PLATFORM_TARGET) : $(PLATFORM_DIR)/*
@@ -26,6 +39,9 @@ all: $(TARGET)
 
 $(TARGET) : $(SRC_CODE) $(PLATFORM_DIR)/*
 	@clear
+ifneq ($(AUTHOR_NAME),)
+	echo $(CONFIG_AUTHOR_NAME) > $(TARGET).cfg
+endif
 	@echo "SRC_FILE = $(SRC_FILE)"
 	@echo "SRC_CODE = $(SRC_CODE)"
 	@echo "CFLAGS = $(CFLAGS)"
@@ -34,8 +50,4 @@ $(TARGET) : $(SRC_CODE) $(PLATFORM_DIR)/*
 	$(CC) $(CFLAGS) $(COMPILE_SRC) $(PLATFORM_OBJECT) -o $@ $(LDFLAGS)
 
 clean :
-	rm -f $(PWD)/$(TARGET)* *.o
-
-
-
-
+	rm -f $(PWD)/$(TARGET)* *.o $(TARGET).cfg
