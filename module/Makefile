@@ -1,5 +1,6 @@
 #compile this program MODULE and iterable small program module
-include module.config
+CONFIG_FILE = module.config
+include $(CONFIG_FILE)
 
 CC = gcc
 CFLAGS += -Wall
@@ -37,7 +38,7 @@ all: $(TARGET)
 #	$(CC) -c $(PLATFORM_SRC) $(PLATFORM_CFLAGS)
 
 
-$(TARGET) : $(SRC_CODE) $(PLATFORM_DIR)/*
+$(TARGET) : $(SRC_CODE) $(PLATFORM_DIR)/* $(CONFIG_FILE)
 	@clear
 ifneq ($(AUTHOR_NAME),)
 	echo $(CONFIG_AUTHOR_NAME) > $(TARGET).cfg
