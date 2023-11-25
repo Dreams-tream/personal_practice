@@ -1,6 +1,6 @@
 #compile this program MODULE and iterable small program module
 CONFIG_FILE = module.config
-include $(CONFIG_FILE)
+-include $(CONFIG_FILE)
 
 CC = gcc
 CFLAGS += -Wall
@@ -49,6 +49,8 @@ endif
 	@echo "LDFLAGS = $(LDFLAGS)"
 	$(CC) -c $(PLATFORM_SRC) $(PLATFORM_CFLAGS)
 	$(CC) $(CFLAGS) $(COMPILE_SRC) $(PLATFORM_OBJECT) -o $@ $(LDFLAGS)
+
+$(CONFIG_FILE):
 
 clean :
 	rm -f $(PWD)/$(TARGET)* *.o $(TARGET).cfg
