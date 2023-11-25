@@ -150,7 +150,10 @@ static void get_author_name_from_config(char *author)
 		return;
 
 	if(NULL == (fp=fopen(conf_file,"r")))
+	{
 		LOG_ERR("open %s failed",conf_file);
+		goto FAILED;
+	}
 
 	fread(author,1,AUTHOR_NAME_LEN,fp);
 	len = strlen(author);
@@ -159,14 +162,17 @@ static void get_author_name_from_config(char *author)
 		author[len-1] = '\0';
 		len--;
 	}
-	str_replace(author,' ','_');
 
-	if(len)
-		memmove(&g_module_cfg.conf.author,author,AUTHOR_NAME_LEN);
-	else
+	if(len<=0)
+	{
+FAILED:
 		memmove(author,DEFAULT_AUTHOR_NAME,AUTHOR_NAME_LEN);
+	}
+	str_replace(author,' ','_');
+	memmove(&g_module_cfg.conf.author,author,AUTHOR_NAME_LEN);
 	PRINT_MODULE_CONFIG();
-	fclose(fp);
+	if(fp)
+		fclose(fp);
 }
 #endif
 
@@ -244,7 +250,7 @@ int module_load_config()
 	j_obj = json_object_from_file(conf_file);//json_object_put
 	if(NULL==j_obj)
 	{
-		LOG_ERR("Read json from config file fail");
+		LOG_ERR("Read json from %s fail",conf_file);
 		return ERROR;
 	}
 
