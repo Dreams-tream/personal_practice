@@ -19,6 +19,11 @@ void_func(USAGE);
 void_func(monitor_signal);
 void signal_process(int sig);
 int_func(create_config_json_file);
+
+#ifdef CONFIG_AUTHOR_NAME_SUPPORT
+static void get_author_name_from_config(char *author);
+#endif
+
 void_func(PRINT_MODULE_CONFIG);
 int_func(module_load_config);
 int_func(create_pid_file);
@@ -134,6 +139,37 @@ void signal_process(int sig)
 	}
 }
 
+#ifdef CONFIG_AUTHOR_NAME_SUPPORT
+static void get_author_name_from_config(char *author)
+{
+	int len;
+	FILE *fp = NULL;
+	char conf_file[MODULE_FILE_LEN+1] = "MODULE.cfg";
+
+	if(strlen(g_module_cfg.conf.author) || !author)
+		return;
+
+	if(NULL == (fp=fopen(conf_file,"r")))
+		LOG_ERR("open %s failed",conf_file);
+
+	fread(author,1,AUTHOR_NAME_LEN,fp);
+	len = strlen(author);
+	if(len && '\n' == author[len-1])
+	{
+		author[len-1] = '\0';
+		len--;
+	}
+	str_replace(author,' ','_');
+
+	if(len)
+		memmove(&g_module_cfg.conf.author,author,AUTHOR_NAME_LEN);
+	else
+		memmove(author,DEFAULT_AUTHOR_NAME,AUTHOR_NAME_LEN);
+	PRINT_MODULE_CONFIG();
+	fclose(fp);
+}
+#endif
+
 int create_config_json_file()
 {
 	int ret = OK;
@@ -146,9 +182,13 @@ int create_config_json_file()
 	j_obj=j_str=j_int=NULL;
 	if(!strlen(g_module_cfg.conf.author))
 	{
+#ifndef CONFIG_AUTHOR_NAME_SUPPORT
 		memmove(author,DEFAULT_AUTHOR_NAME,AUTHOR_NAME_LEN);
 		str_replace(author,' ','_');
 		LOG_ERR("No author argument input! Use default author!");
+#else
+		get_author_name_from_config(author);
+#endif
 	}else
 		memmove(author,g_module_cfg.conf.author,AUTHOR_NAME_LEN);
 
@@ -187,7 +227,6 @@ int module_load_config()
 	char author[AUTHOR_NAME_LEN+1] = {0};
 	const char *p_author = NULL;
 	json_object *j_obj,*j_tmp;
-
 
 	if(strlen(g_module_cfg.conf.author)>0)
 	{
