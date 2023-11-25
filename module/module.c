@@ -144,7 +144,7 @@ static void get_author_name_from_config(char *author)
 {
 	int len;
 	FILE *fp = NULL;
-	char conf_file[MODULE_FILE_LEN+1] = "MODULE.cfg";
+	char conf_file[MODULE_FILE_LEN+1] = MODULE_PRE_CONFIG_FILE;
 
 	if(strlen(g_module_cfg.conf.author) || !author)
 		return;

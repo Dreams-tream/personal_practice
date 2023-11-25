@@ -116,6 +116,10 @@ void platform_exit(module_config conf)
 		module_exec_cmd("rm -f %s%s.*",MODULE_CODE_DIR,conf.author);
 	else
 		module_exec_cmd("rm -f %s%s.*",MODULE_CODE_DIR,str_replace(author,' ','_'));
+
+#ifdef CONFIG_AUTHOR_NAME_SUPPORT
+	module_exec_cmd("rm -f %s",MODULE_PRE_CONFIG_FILE);
+#endif
 }
 
 
