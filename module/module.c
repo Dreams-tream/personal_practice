@@ -10,6 +10,7 @@
 #include"log.h"
 
 #define MAX_ERROR_TIMES                    5
+#define MAX_MILLISECOND_INPUT              999
 
 static module_cfg g_module_cfg;
 extern char g_virtule_console[MAX_DEVICE_LEN];
@@ -51,6 +52,8 @@ int module_parse_parameter(int argc,char **argv,const char *optstring)
 			}
 			break;
 		case 's':
+			/*The strspn() function calculates the length (in bytes) of the initial segment of s which
+			consists entirely of bytes in accept*/
 			if(strspn(optarg, "0123456789") == strlen(optarg))
 			{
 				LOG_DEBUG("second is %s",optarg);
@@ -66,6 +69,11 @@ int module_parse_parameter(int argc,char **argv,const char *optstring)
 			{
 				LOG_DEBUG("millisecond is %s",optarg);
 				g_module_cfg.conf.millisecond = atoi(optarg);
+				if(g_module_cfg.conf.millisecond>MAX_MILLISECOND_INPUT)
+				{
+					LOG_ERR("Error! Millisecond must be an integer between 0 and 1000");
+					goto HELP;
+				}
 			}else
 			{
 				LOG_ERR("%s: invalid number",optarg);
