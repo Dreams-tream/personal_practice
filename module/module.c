@@ -22,6 +22,7 @@ void signal_process(int sig);
 int_func(create_config_json_file);
 
 #ifdef CONFIG_AUTHOR_NAME_SUPPORT
+static void_func(create_module_cfg_for_author);
 static void get_author_name_from_config(char *author);
 #endif
 
@@ -148,6 +149,24 @@ void signal_process(int sig)
 }
 
 #ifdef CONFIG_AUTHOR_NAME_SUPPORT
+static void create_module_cfg_for_author()
+{
+	char *p = NULL;
+	char cmd[MAX_CMD_LEN+1] = {0};
+	char res[MAX_CMD_LEN+1] = {0};
+	char author_name[AUTHOR_NAME_LEN+1] = {0};
+
+	snprintf(cmd,MAX_CMD_LEN,"cat %s | grep '%s'",MODULE_PRE_CONFIG,CONFIG_AUTHOR_NAME);
+	module_exec_get_res(cmd,res);
+	LOG_DEBUG("cmd is '%s', res is '%s'",cmd,res);
+
+	if(strlen(res) && NULL != (p = strchr(res,'=')))
+	{
+		strncpy(author_name,p+1,AUTHOR_NAME_LEN);
+		module_exec_cmd("echo %s > %s",author_name,MODULE_PRE_CONFIG_FILE);
+	}
+}
+
 static void get_author_name_from_config(char *author)
 {
 	int len;
@@ -201,6 +220,7 @@ int create_config_json_file()
 		str_replace(author,' ','_');
 		LOG_ERR("No author argument input! Use default author!");
 #else
+		create_module_cfg_for_author();
 		get_author_name_from_config(author);
 #endif
 	}else

@@ -13,7 +13,9 @@
 #define LOOP_TIMEOUT_MICROSECOND                LOOP_TIMEOUT_MILLISECOND*1000  /*us*/
 
 #ifdef CONFIG_AUTHOR_NAME_SUPPORT
-#define MODULE_PRE_CONFIG_FILE             "MODULE.cfg"
+#define MODULE_PRE_CONFIG                  MODULE_CODE_DIR"module.config"
+#define CONFIG_AUTHOR_NAME                 "CONFIG_AUTHOR_NAME="
+#define MODULE_PRE_CONFIG_FILE             MODULE_CODE_DIR"MODULE.cfg"
 #endif
 
 #define void_func(_func)               void _func(void)
