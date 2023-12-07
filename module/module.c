@@ -295,7 +295,7 @@ int module_load_config()
 		memmove(&g_module_cfg.conf.author,p_author,strlen(p_author));
 	g_module_cfg.conf.second = second;
 	g_module_cfg.conf.millisecond = millisecond;
-	PRINT_MODULE_CONFIG();
+	//PRINT_MODULE_CONFIG();
 	json_object_put(j_obj);
 	return OK;
 }
