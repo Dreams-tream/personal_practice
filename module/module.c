@@ -205,9 +205,11 @@ int create_config_json_file()
 		ret = ERROR;
 		goto END;
 	}
+
+	millisecond<=0?(millisecond = (second>0)?0:LOOP_TIMEOUT_MILLISECOND):0;
 	json_object_object_add(j_obj,"author",json_object_new_string(author));
 	json_object_object_add(j_obj,"second",json_object_new_int(second>0?second:LOOP_TIMEOUT_SECOND));
-	json_object_object_add(j_obj,"millisecond",json_object_new_int(millisecond>0?millisecond:LOOP_TIMEOUT_MILLISECOND));
+	json_object_object_add(j_obj,"millisecond",json_object_new_int(millisecond));
 	LOG_ERR("%s:%s",conf_file,json_object_to_json_string(j_obj));
 END:
 	if(j_obj){

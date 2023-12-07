@@ -45,7 +45,7 @@ void platform_timer_loop(module_config conf)
 
 	max_fd = (max_fd>timer_fd?max_fd:timer_fd);
 	timeout.tv_sec = conf.second;
-	u_sec = conf.millisecond>0?conf.millisecond * 1000:LOOP_TIMEOUT_MICROSECOND;
+	u_sec = conf.millisecond * 1000;
 	new_time.it_value.tv_sec = now.tv_sec;
 	new_time.it_value.tv_nsec = now.tv_nsec;
 	new_time.it_interval.tv_sec = timeout.tv_sec;
