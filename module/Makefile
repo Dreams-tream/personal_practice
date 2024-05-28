@@ -53,4 +53,4 @@ endif
 $(CONFIG_FILE):
 
 clean :
-	rm -f $(PWD)/$(TARGET)* *.o $(TARGET).cfg
+	rm -f $(PWD)/$(TARGET)* *.o *.cfg Readme
