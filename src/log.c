@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 #include "log.h"
 
 int dbg_level = LOG_LEVEL_ERROR;
