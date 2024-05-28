@@ -1,4 +1,4 @@
-# personal_practice
+# dhcp to get ip on ubuntu
 This is a simple personal practice of C language, which can check whether your virtual machine has ipv4 address. If not, the program will create one by dhcp. Otherwise, it will check next time.
 
 Tips:
