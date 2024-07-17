@@ -8,11 +8,13 @@
 #include <json_object.h>
 #include<json_util.h>
 #include"log.h"
+#include<time.h>
 
 #define MAX_ERROR_TIMES                    5
 #define MAX_MILLISECOND_INPUT              999
 
 static module_cfg g_module_cfg;
+static time_t start_time, end_time;
 extern char g_virtule_console[MAX_DEVICE_LEN];
 
 int module_parse_parameter(int argc,char **argv,const char *optstring);
@@ -136,6 +138,10 @@ void signal_process(int sig)
 	case SIGTERM:
 	case SIGINT:
 		LOG_ERR("Exit this module");
+		time(&end_time);
+		LOG_ERR("start_time = %ld second", start_time);
+		LOG_ERR("end_time = %ld second", end_time);
+		LOG_ERR("Execute time is %ld seconds", end_time-start_time);
 		module_exit(&g_module_cfg);
 		exit(0);
 	case SIGUSR1:
@@ -369,6 +375,7 @@ REPEAT:
 
 int main(int argc, char **argv)
 {
+	time(&start_time);
 	memset(&g_module_cfg,0,sizeof(g_module_cfg));
 	memset(g_virtule_console,0,sizeof(g_virtule_console));
 
