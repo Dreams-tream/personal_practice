@@ -1,5 +1,5 @@
 #!/bin/bash
-module_path=/home/yangcuilang/C_Code/module
+module_path=/home/yangcuilang/GIT_PROJECT/personal_practice/module
 module_name=MODULE
 readme=${module_path}/Readme
 

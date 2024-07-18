@@ -3,7 +3,7 @@
 
 #include "module_common.h"
 
-#define MODULE_CODE_DIR                         "/home/yangcuilang/C_Code/module/"
+#define MODULE_CODE_DIR                         "/home/yangcuilang/GIT_PROJECT/personal_practice/module"
 #define DEFAULT_AUTHOR_NAME                     "Yang Cuilang"
 #define CONFIG_FILE_POSTFIX                     ".cfg"
 #define AUTHOR_NAME_LEN                         30
