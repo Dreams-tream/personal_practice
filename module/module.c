@@ -157,44 +157,28 @@ void signal_process(int sig)
 #ifdef CONFIG_AUTHOR_NAME_SUPPORT
 static void create_module_cfg_for_author()
 {
-	char *p = NULL;
-	char cmd[MAX_CMD_LEN] = {0};
-	char res[MAX_CMD_LEN] = {0};
-	char author_name[AUTHOR_NAME_LEN] = {0};
-
-	snprintf(cmd, sizeof(cmd) - 1, "cat %s | grep \"%s\"", MODULE_PRE_CONFIG, CONFIG_AUTHOR_NAME);
-	if (!module_exec_get_res(cmd, res, sizeof(res)))
-	{
-		LOG_DEBUG("cmd is '%s', res is '%s'",cmd, res);
-		if(NULL != (p = strchr(res,'=')))
-		{
-			strncpy(author_name, p + 1, sizeof(author_name) - 1);
-			module_exec_cmd("echo %s > %s", author_name, MODULE_PRE_CONFIG_FILE);
-		}
-	}
+	module_exec_cmd("echo %s > %s", DEFAULT_AUTHOR_NAME, MODULE_PRE_CONFIG_FILE);
 }
 
 static void get_author_name_from_config(char *author)
 {
 	int len;
 	FILE *fp = NULL;
-	char conf_file[MODULE_FILE_LEN+1] = MODULE_PRE_CONFIG_FILE;
+	char conf_file[MODULE_FILE_LEN] = MODULE_PRE_CONFIG_FILE;
 
 	if(strlen(g_module_cfg.conf.author) || !author)
 		return;
 
-	if(NULL == (fp=fopen(conf_file,"r")))
+	if(NULL == (fp = fopen(conf_file,"r")))
 	{
 		LOG_ERR("open %s failed",conf_file);
 		goto FAILED;
 	}
 
-	fread(author,1,AUTHOR_NAME_LEN,fp);
-	len = strlen(author);
+	len = fread(author, 1, AUTHOR_NAME_LEN, fp);
 	if(len && '\n' == author[len-1])
 	{
-		author[len-1] = '\0';
-		len--;
+		author[--len] = '\0';
 	}
 
 	if(len<=0)
