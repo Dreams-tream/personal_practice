@@ -6,6 +6,11 @@ typedef enum{
 	OK = 0,
 } STATUS;
 
+typedef enum{
+	false,
+	true,
+} bool;
+
 int str_replace(char *str,const char source,const char dest);
 
 #endif

@@ -1,18 +1,51 @@
-#include "platform.h"
 #include <stdio.h>
 #include <string.h>
+#include "platform.h"
 #include "log.h"
+#include "module_ioctl.h"
 
+
+/***************************************MACRO*******************************************/
 #define DO_SOMETHING_COUNT                                  5
 
-int timer_cnt = 0;
-int wait_cnt = 0;
+/**********************************GLOBAL VARIABLE**************************************/
+static int timer_cnt = 0;
+static int wait_cnt = 0;
 
 /*********************************** FUNCTIONS *****************************************/
-void check_ip_address()
+static STATUS shell_get_ip_mac_mask_address(char ipaddr[], int len)
 {
 	char cmd[MAX_CMD_LEN] = {0};
 	char buf[MAX_CMD_LEN] = {0};
+
+	if (!ipaddr || len < 0)
+	{
+		return ERROR;
+	}
+
+	strncpy(cmd, "ifconfig |grep 'inet addr'|grep Bcast|gawk '{print $2}'", MAX_CMD_LEN);
+	if (ERROR == module_exec_get_res(cmd, buf, sizeof(buf)))
+	{
+		return ERROR;
+	}
+
+	strncpy(ipaddr, buf + 5, len - 1);
+	return OK;
+}
+
+static STATUS get_ip_addr(char ipaddr[], int len)
+{
+	return
+#ifdef USE_IOCTL
+	ioctl_get_ip_mac_mask_address(ipaddr, len);
+#else
+	shell_get_ip_mac_mask_address(ipaddr, len);
+#endif
+}
+
+void check_ip_address()
+{
+	char ipaddr[MAX_CMD_LEN] = {0};
 
 	if(wait_cnt)
 	{
@@ -20,12 +53,9 @@ void check_ip_address()
 		return;
 	}
 
-	strncpy(cmd, "ifconfig |grep 'inet addr'|grep Bcast|gawk '{print $2}'", MAX_CMD_LEN);
-
-	if (!module_exec_get_res(cmd, buf, sizeof(buf)))
+	if (OK == get_ip_addr(ipaddr, sizeof(ipaddr)))
 	{
-		LOG_DEBUG("buf is '%s'", buf);
-		LOG_INFO("your ipv4 address is %s", buf + 5);
+		LOG_INFO("your ipv4 address is %s", ipaddr);
 	}
 	else
 	{

@@ -1,4 +1,3 @@
-#include "log.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -8,6 +7,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <signal.h>
+#include "log.h"
+#include "module_common.h"
+
 
 #define NAME_TO_STR(_name)         (#_name)
 
@@ -86,18 +88,18 @@ void va_printf(const char* fmt, ...)
 	close(fd);
 }
 
-int module_exec_get_res(const char *cmd,char *buf, int buflen)
+STATUS module_exec_get_res(const char *cmd,char *buf, int buflen)
 {
 	FILE *fp;
 	int len;
 
 	if (!cmd || !buf)
 	{
-		return -1;
+		return ERROR;
 	}
 	if (NULL == (fp = popen(cmd, "r")))
 	{
-		return -1;
+		return ERROR;
 	}
 
 	if ((len = fread(buf, 1, buflen- 1, fp)) > 0)
@@ -109,5 +111,5 @@ int module_exec_get_res(const char *cmd,char *buf, int buflen)
 	}
 
 	pclose(fp);
-	return len > 0 ? 0 : -1;
+	return len > 0 ? OK : ERROR;
 }
