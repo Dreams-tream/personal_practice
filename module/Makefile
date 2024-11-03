@@ -1,11 +1,19 @@
-#compile this program MODULE and iterable small program module
+# Author: Cuilang Yang 2023.07
+
 CONFIG_FILE = module.config
--include $(CONFIG_FILE)
+include $(CONFIG_FILE)
 
 CC = gcc
 CFLAGS += -Wall
 CFLAGS += $(shell pkg-config --cflags json-c)
 LDFLAGS += $(shell pkg-config --libs json-c)
+
+CFLAGS += -DMODULE_CODE_DIR=\"$(PWD)/\"
+CFLAGS += -DDEFAULT_AUTHOR_NAME=\"$(AUTHOR)\"
+
+ifeq ($(CONFIG_AUTHOR_NAME_SUPPORT),y)
+CFLAGS += -DCONFIG_AUTHOR_NAME_SUPPORT
+endif
 
 TARGET = MODULE
 PWD = $(shell pwd)
@@ -15,24 +23,13 @@ SRC_FILE = $(shell ls $(PWD))
 SRC_CODE = $(filter %.c %.h,$(SRC_FILE))
 COMPILE_SRC = module.c module_callback.c module_platform.c module_common.c log.c
 
-CFLAGS += -DMODULE_CODE_DIR=\"$(PWD)/\"
-CFLAGS += -DDEFAULT_AUTHOR_NAME=\"$(AUTHOR)\"
-
 PLATFORM_TARGET = platform
 PLATFORM_OBJECT = $(PLATFORM_TARGET).o
 PLATFORM_DIR = $(PWD)/platform_src
 PLATFORM_SRC = $(PLATFORM_DIR)/platform.c
 PLATFORM_CFLAGS = -Wall -I$(PLATFORM_DIR) -I$(PWD)
 
-ifdef CONFIG_AUTHOR_NAME_SUPPORT
-ifeq ($(CONFIG_AUTHOR_NAME_SUPPORT),y)
-  CFLAGS += -DCONFIG_AUTHOR_NAME_SUPPORT
-ifneq ($(CONFIG_AUTHOR_NAME),)
-  #create author name config file
-  AUTHOR_NAME = $(CONFIG_AUTHOR_NAME)
-endif
-endif
-endif
+
 
 .PHONY: all clean
 
