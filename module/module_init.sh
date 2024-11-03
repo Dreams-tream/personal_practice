@@ -1,10 +1,15 @@
 #!/bin/bash
-module_path=/home/yangcuilang/GIT_PROJECT/personal_practice/module
+
+# exit when error occurs
+#set -e
+
+module_path=.
 module_name=MODULE
 readme=${module_path}/Readme
 
 function start()
 {
+	echo ${module_path}/${module_name} $*
 	${module_path}/${module_name} $*
 }
 
@@ -39,5 +44,4 @@ create_readme()
 create_readme
 compile
 stop
-print $*
 start $*

@@ -9,16 +9,20 @@ LDFLAGS += $(shell pkg-config --libs json-c)
 
 TARGET = MODULE
 PWD = $(shell pwd)
+AUTHOR = $(shell ls /home)
 SRC_FILE = $(shell ls $(PWD))
 #SRC_CODE = $(wildcard $(PWD)/*.c)
 SRC_CODE = $(filter %.c %.h,$(SRC_FILE))
 COMPILE_SRC = module.c module_callback.c module_platform.c module_common.c log.c
 
+CFLAGS += -DMODULE_CODE_DIR=\"$(PWD)/\"
+CFLAGS += -DDEFAULT_AUTHOR_NAME=\"$(AUTHOR)\"
+
 PLATFORM_TARGET = platform
 PLATFORM_OBJECT = $(PLATFORM_TARGET).o
 PLATFORM_DIR = $(PWD)/platform_src
 PLATFORM_SRC = $(PLATFORM_DIR)/platform.c
-PLATFORM_CFLAGS = -Wall -I$(PLATFORM_DIR)
+PLATFORM_CFLAGS = -Wall -I$(PLATFORM_DIR) -I$(PWD)
 
 ifdef CONFIG_AUTHOR_NAME_SUPPORT
 ifeq ($(CONFIG_AUTHOR_NAME_SUPPORT),y)
@@ -53,4 +57,4 @@ endif
 $(CONFIG_FILE):
 
 clean :
-	rm -f $(PWD)/$(TARGET)* *.o *.cfg Readme
+	rm -f $(PWD)/$(TARGET)* *.o $(TARGET).cfg Readme

@@ -86,28 +86,28 @@ void va_printf(const char* fmt, ...)
 	close(fd);
 }
 
-/*execute cmd and get all output in res if the length of result is less than MAX_CMD_LEN*/
-int module_exec_get_res(const char *cmd,char *res)
+int module_exec_get_res(const char *cmd,char *buf, int buflen)
 {
-	FILE *fp = NULL;
-	char *p = NULL;
+	FILE *fp;
+	int len;
 
-	//printf("%s\n",cmd);
-	if ( NULL == (fp=popen(cmd,"r")) )
+	if (!cmd || !buf)
 	{
-		LOG_ERR("popen failed!");
-		return (-1);
+		return -1;
+	}
+	if (NULL == (fp = popen(cmd, "r")))
+	{
+		return -1;
 	}
 
-	char *str = res;
-	while( NULL != fgets(str,MAX_CMD_LEN,fp) )//fgets add '\0' at the end
+	if ((len = fread(buf, 1, buflen- 1, fp)) > 0)
 	{
-		str+=strlen(str);
+		while (len && (buf[len - 1] == '\n' || buf[len - 1] == '\r'))
+		{
+			buf[--len] = '\0';
+		}
 	}
-	p = &str[strlen(str)-1];
-	if ( *p == '\n' || *p == '\r' )
-		*p = '\0';
+
 	pclose(fp);
-	//printf("%s\n",res);
-	return 0;
+	return len > 0 ? 0 : -1;
 }

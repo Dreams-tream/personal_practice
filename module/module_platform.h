@@ -3,8 +3,14 @@
 
 #include "module_common.h"
 
-#define MODULE_CODE_DIR                         "/home/yangcuilang/GIT_PROJECT/personal_practice/module"
-#define DEFAULT_AUTHOR_NAME                     "Yang Cuilang"
+#ifndef MODULE_CODE_DIR
+#define MODULE_CODE_DIR                         ""
+#endif
+
+#ifndef DEFAULT_AUTHOR_NAME
+#define DEFAULT_AUTHOR_NAME                     ""
+#endif
+
 #define CONFIG_FILE_POSTFIX                     ".cfg"
 #define AUTHOR_NAME_LEN                         30
 #define MODULE_FILE_LEN                         100
@@ -13,9 +19,9 @@
 #define LOOP_TIMEOUT_MICROSECOND                LOOP_TIMEOUT_MILLISECOND*1000  /*us*/
 
 #ifdef CONFIG_AUTHOR_NAME_SUPPORT
-#define MODULE_PRE_CONFIG                  MODULE_CODE_DIR"module.config"
+#define MODULE_PRE_CONFIG                  MODULE_CODE_DIR "module.config"
 #define CONFIG_AUTHOR_NAME                 "CONFIG_AUTHOR_NAME="
-#define MODULE_PRE_CONFIG_FILE             MODULE_CODE_DIR"MODULE.cfg"
+#define MODULE_PRE_CONFIG_FILE             MODULE_CODE_DIR "MODULE.cfg"
 #endif
 
 #define void_func(_func)               void _func(void)
@@ -51,7 +57,4 @@ void platform_timer_loop(module_config);
 void_func(platform_event_loop);
 void platform_exit(module_config);
 
-
-
 #endif
-

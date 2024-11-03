@@ -158,18 +158,19 @@ void signal_process(int sig)
 static void create_module_cfg_for_author()
 {
 	char *p = NULL;
-	char cmd[MAX_CMD_LEN+1] = {0};
-	char res[MAX_CMD_LEN+1] = {0};
-	char author_name[AUTHOR_NAME_LEN+1] = {0};
+	char cmd[MAX_CMD_LEN] = {0};
+	char res[MAX_CMD_LEN] = {0};
+	char author_name[AUTHOR_NAME_LEN] = {0};
 
-	snprintf(cmd,MAX_CMD_LEN,"cat %s | grep '%s'",MODULE_PRE_CONFIG,CONFIG_AUTHOR_NAME);
-	module_exec_get_res(cmd,res);
-	LOG_DEBUG("cmd is '%s', res is '%s'",cmd,res);
-
-	if(strlen(res) && NULL != (p = strchr(res,'=')))
+	snprintf(cmd, sizeof(cmd) - 1, "cat %s | grep \"%s\"", MODULE_PRE_CONFIG, CONFIG_AUTHOR_NAME);
+	if (!module_exec_get_res(cmd, res, sizeof(res)))
 	{
-		strncpy(author_name,p+1,AUTHOR_NAME_LEN);
-		module_exec_cmd("echo %s > %s",author_name,MODULE_PRE_CONFIG_FILE);
+		LOG_DEBUG("cmd is '%s', res is '%s'",cmd, res);
+		if(NULL != (p = strchr(res,'=')))
+		{
+			strncpy(author_name, p + 1, sizeof(author_name) - 1);
+			module_exec_cmd("echo %s > %s", author_name, MODULE_PRE_CONFIG_FILE);
+		}
 	}
 }
 
