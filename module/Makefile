@@ -39,7 +39,7 @@ $(TARGET) : $(OBJS)
 	@echo "LDFLAGS = $(LDFLAGS)"
 	$(CC) $(CFLAGS) $(OBJS) -o $@ $(LDFLAGS)
 
-%.o : %.c %.h
+%.o : %.c %.h $(CONFIG_FILE)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean :
